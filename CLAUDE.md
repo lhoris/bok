@@ -1,0 +1,1 @@
+Read AGENTS.md before starting any task and follow its instructions.
