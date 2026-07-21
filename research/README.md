@@ -13,7 +13,7 @@
 | Phase | 카테고리 | 대상 | 상태 |
 |------|---------|------|------|
 | 1 | AI Framework | Spec Kit, BMAD Method, Claude Code Skills, Context Engineering, Agentic Workflow, Multi-Agent | ✅ 완료 |
-| 2 | Enterprise Onboarding | Backstage, Developer Portal, Service Catalog, Software Archaeology, EA, Technical Due Diligence | ⬜ 대기 |
+| 2 | Enterprise Onboarding | Backstage, Developer Portal, Service Catalog, Software Archaeology, EA, Technical Due Diligence | ✅ 완료 |
 | 3 | Knowledge Engineering | KM, Knowledge Engineering, Knowledge Graph, Knowledge Base, LLM Wiki, Domain Modeling | ⬜ 대기 |
 | 4 | Documentation & Architecture | arc42, ADR, C4 Model, Diátaxis | ⬜ 대기 |
 | — | **Synthesis** | 4개 카테고리 교차 통합 → 설계 입력 | ⬜ 대기 |
@@ -49,4 +49,12 @@
 - `01-ai-framework/multi-agent.md`
 - `01-ai-framework/_phase1-synthesis.md` ← 통합 노트
 
-**Phase 2~4** — (이후 추가)
+**Phase 2 — Enterprise Onboarding (✅)**
+- `02-enterprise-onboarding/backstage.md`
+- `02-enterprise-onboarding/developer-portal-and-service-catalog.md`
+- `02-enterprise-onboarding/software-archaeology.md`
+- `02-enterprise-onboarding/enterprise-architecture.md`
+- `02-enterprise-onboarding/technical-due-diligence.md`
+- `02-enterprise-onboarding/_phase2-synthesis.md` ← 통합 노트
+
+**Phase 3~4** — (이후 추가)
