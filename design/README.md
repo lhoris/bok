@@ -7,8 +7,8 @@
 
 | # | 산출물 | 상태 |
 |---|--------|------|
-| 01 | **BoK Model & Context Model** — 지식 단위 스키마·관계·저장·소비 | 🔄 진행 중 |
-| 02 | Workflow & Command 체계 (`discover/context/validate/ready`) | ⬜ |
+| 01 | **BoK Model & Context Model** — 지식 단위 스키마·관계·저장·소비 | ✅ 완료 |
+| 02 | Workflow & Command 체계 (`discover/context/validate/ready`) | ✅ 완료 |
 | 03 | Agent & Skill 정의 | ⬜ |
 | 04 | Knowledge Validation & Development Readiness 모델 | ⬜ |
 | 05 | Repository / Wiki 구조 | ⬜ |
@@ -16,3 +16,4 @@
 
 ## 파일 목록
 - `01-bok-model-and-context-model.md`
+- `02-workflow-and-commands.md`
