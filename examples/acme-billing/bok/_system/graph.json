@@ -1,0 +1,34 @@
+{
+  "nodes": [
+    "bok://billing/explanation/double-settlement-guard",
+    "bok://billing/glossary/idempotency-key",
+    "bok://billing/reference/settlement-batch"
+  ],
+  "edges": [
+    {
+      "from": "bok://billing/explanation/double-settlement-guard",
+      "type": "derived-from",
+      "to": "bok://billing/reference/settlement-batch"
+    },
+    {
+      "from": "bok://billing/explanation/double-settlement-guard",
+      "type": "defines-term",
+      "to": "bok://billing/glossary/idempotency-key"
+    },
+    {
+      "from": "bok://billing/glossary/idempotency-key",
+      "type": "part-of",
+      "to": "bok://billing/reference/settlement-batch"
+    },
+    {
+      "from": "bok://billing/reference/settlement-batch",
+      "type": "depends-on",
+      "to": "bok://billing/reference/ledger-store"
+    },
+    {
+      "from": "bok://billing/reference/settlement-batch",
+      "type": "defines-term",
+      "to": "bok://billing/glossary/idempotency-key"
+    }
+  ]
+}

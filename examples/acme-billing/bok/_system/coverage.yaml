@@ -1,43 +1,36 @@
-# Coverage grid — arc42 12 + TDD (design/04 B.2). context가 갱신, ready가 status 계산.
+# Coverage grid — arc42 12 + TDD (design/04 B.2).
+# AUTHORED input: {id, criticality, kus, open_gap}. `status` is COMPUTED by
+# `bok ready` from criticality + KU confidence (+ open_gap). Do not hand-set status.
 scope: billing
 areas:
-  - id: context-and-scope
+  - id: context-and-scope          # arc42 §3 / C4 Context
     criticality: high
     kus: [bok://billing/reference/settlement-batch]
-    status: amber            # 컨테이너/외부연동 KU 부분적
-  - id: business-rules
+    open_gap: true                 # 컨테이너/외부연동 KU 미완 (known-incomplete)
+  - id: business-rules             # arc42 §4/§9 + business process archaeology
     criticality: critical
     kus: [bok://billing/explanation/double-settlement-guard]
-    status: amber            # corroborated — critical은 verified 요구(1단계 미달)
-  - id: data-model
+  - id: data-model                 # arc42 §5 / data layer
     criticality: critical
-    kus: []                  # ledger-store 미발굴 (dangling relation과 일치)
-    status: red
-  - id: runtime-behavior
+    kus: []                        # ledger-store 미발굴 (catalog dangling과 일치)
+  - id: runtime-behavior           # arc42 §6
     criticality: high
-    kus: []                  # 부분 실패 재개 미확인(settlement-batch 열린 질문)
-    status: red
-  - id: deployment-ops
+    kus: []                        # 부분 실패 재개 미확인
+  - id: deployment-ops             # arc42 §7
     criticality: normal
     kus: []
-    status: red
-  - id: decisions-rationale
+  - id: decisions-rationale        # arc42 §9 / ADR
     criticality: high
     kus: [bok://billing/explanation/double-settlement-guard]
-    status: green
-  - id: glossary-ubiquitous-lang
+  - id: glossary-ubiquitous-lang   # arc42 §12 / DDD
     criticality: normal
     kus: [bok://billing/glossary/idempotency-key]
-    status: green
-  - id: risks-tech-debt
+  - id: risks-tech-debt            # arc42 §11 / TDD
     criticality: high
     kus: []
-    status: red
-  - id: dependencies-eol
+  - id: dependencies-eol           # TDD
     criticality: normal
     kus: []
-    status: red
-  - id: team-bus-factor
+  - id: team-bus-factor            # TDD 팀 의존성
     criticality: high
-    kus: []
-    status: red             # double-settlement-guard가 human 단일 소스(kim) 의존
+    kus: []                        # double-settlement-guard가 human 단일 소스(kim) 의존

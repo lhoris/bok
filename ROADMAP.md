@@ -7,11 +7,13 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - ✅ **설계(Design)** — `design/01–06`, 예제 `examples/acme-billing/`.
 - ⬜ **구현(Implementation)** — 아래 M1~.
 
-## M1 — Walking Skeleton (최소 동작 CLI)
+## M1 — Walking Skeleton (최소 동작 CLI) 🔄
 목표: `examples/acme-billing`을 손이 아니라 도구로 재생성.
-- `bok init` / `bok compile`(catalog·graph·dangling 검사) / `bok-schema` 검증.
-- `bok ready`의 coverage→신호등→hard gate→tier 계산(D04) 구현.
-- **검증 질문**: coverage 영역↔KU 자동 매핑이 손 없이 얼마나 정확한가(D04 F-1).
+- ✅ `bok compile`(catalog·graph·dangling 검사) + KU 스키마 검증(`cli/bok.py`).
+- ✅ `bok ready`의 coverage→신호등→hard gate→tier 계산(D04) 구현·실증.
+- ⬜ `bok init` 스캐폴딩, git pre-commit hook 연동(D05 §8).
+- **검증 답(진행분)**: 완결성은 confidence만으로 계산 불가 → `open_gap` 저작 플래그로 해소.
+  자동 영역↔KU 매핑 정확도는 M2(discover) 이후 실측. 상세: `cli/README.md` M1 Findings.
 
 ## M2 — Discover (근거 발굴)
 - `code-archaeology` Skill: 의존성·변경 히트맵·데이터모델 추출 → 후보 KU(provenance 자동).
