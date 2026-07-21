@@ -11,7 +11,7 @@
 | 02 | Workflow & Command 체계 (`discover/context/validate/ready`) | ✅ 완료 |
 | 03 | Agent & Skill 정의 | ✅ 완료 |
 | 04 | Knowledge Validation & Development Readiness 모델 | ✅ 완료 |
-| 05 | Repository / Wiki 구조 | ⬜ |
+| 05 | Repository / Wiki 구조 | ✅ 완료 |
 | 06 | 예제 프로젝트 · Contributor Guide · Roadmap | ⬜ |
 
 ## 파일 목록
@@ -19,3 +19,4 @@
 - `02-workflow-and-commands.md`
 - `03-agents-and-skills.md`
 - `04-validation-and-readiness.md`
+- `05-repository-and-wiki-structure.md`
