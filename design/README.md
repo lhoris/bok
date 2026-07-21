@@ -12,7 +12,7 @@
 | 03 | Agent & Skill 정의 | ✅ 완료 |
 | 04 | Knowledge Validation & Development Readiness 모델 | ✅ 완료 |
 | 05 | Repository / Wiki 구조 | ✅ 완료 |
-| 06 | 예제 프로젝트 · Contributor Guide · Roadmap | ⬜ |
+| 06 | 예제 프로젝트 · Contributor Guide · Roadmap | ✅ 완료 |
 
 ## 파일 목록
 - `01-bok-model-and-context-model.md`
@@ -20,3 +20,8 @@
 - `03-agents-and-skills.md`
 - `04-validation-and-readiness.md`
 - `05-repository-and-wiki-structure.md`
+- `06-example-contributor-roadmap.md`
+
+## 산출물 (설계 밖)
+- `../examples/acme-billing/` — 실증 예제(1회전 나선)
+- `../CONTRIBUTING.md` · `../ROADMAP.md`

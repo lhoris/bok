@@ -1,0 +1,43 @@
+# Coverage grid — arc42 12 + TDD (design/04 B.2). context가 갱신, ready가 status 계산.
+scope: billing
+areas:
+  - id: context-and-scope
+    criticality: high
+    kus: [bok://billing/reference/settlement-batch]
+    status: amber            # 컨테이너/외부연동 KU 부분적
+  - id: business-rules
+    criticality: critical
+    kus: [bok://billing/explanation/double-settlement-guard]
+    status: amber            # corroborated — critical은 verified 요구(1단계 미달)
+  - id: data-model
+    criticality: critical
+    kus: []                  # ledger-store 미발굴 (dangling relation과 일치)
+    status: red
+  - id: runtime-behavior
+    criticality: high
+    kus: []                  # 부분 실패 재개 미확인(settlement-batch 열린 질문)
+    status: red
+  - id: deployment-ops
+    criticality: normal
+    kus: []
+    status: red
+  - id: decisions-rationale
+    criticality: high
+    kus: [bok://billing/explanation/double-settlement-guard]
+    status: green
+  - id: glossary-ubiquitous-lang
+    criticality: normal
+    kus: [bok://billing/glossary/idempotency-key]
+    status: green
+  - id: risks-tech-debt
+    criticality: high
+    kus: []
+    status: red
+  - id: dependencies-eol
+    criticality: normal
+    kus: []
+    status: red
+  - id: team-bus-factor
+    criticality: high
+    kus: []
+    status: red             # double-settlement-guard가 human 단일 소스(kim) 의존
