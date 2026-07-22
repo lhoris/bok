@@ -69,7 +69,11 @@ relations:
 ```
 research/    조사 — 20+ 프레임워크 분석 + _SYNTHESIS.md (설계 근거)
 design/      설계 — 01 BoK/Context 모델 … 06 예제·로드맵 (결정 D1–D22)
-examples/    실증 — acme-billing (1회전 나선 스냅샷)
+cli/         구현 — `bok` CLI 8커맨드 (결정론 코어)
+agents/      5 코어 에이전트 (CLI↔LLM 경계 정의)
+packs/core/  10 코어 Skill (progressive disclosure)
+templates/   KU·coverage·hook 템플릿
+examples/    실증 — acme-billing(손+검증), mini-shop(전자동 발굴)
 CONTRIBUTING.md · ROADMAP.md
 ```
 

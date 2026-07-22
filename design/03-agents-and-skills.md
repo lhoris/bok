@@ -2,6 +2,8 @@
 
 > 설계 입력: `research/_SYNTHESIS.md`, `design/01`, `design/02`.
 > 누가(Agent) 무엇을(Skill) 어떻게 수행하는가. 원칙: **소수 역할 + 재사용 절차**. BMAD 12+ 에이전트 과잉을 경계하고(`research/01/bmad-method.md`), 단순성을 우선한다(`research/01/agentic-workflow.md`).
+>
+> **실체화됨**: 이 설계는 `agents/*.md`(5 에이전트)와 `packs/core/**/SKILL.md`(10 Skill)로 구현되어 있다. 각 파일은 결정론(`bok` CLI)과 LLM 추론이 만나는 지점을 명시한다.
 
 ## 0. 핵심 원칙 — Thin Agents, Fat Skills
 

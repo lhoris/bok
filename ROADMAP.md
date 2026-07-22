@@ -48,6 +48,12 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
   boilerplate 단어("변경열도")에 매칭됨. **정밀 관련성엔 임베딩 필요**(향후). 현재는
   relations 확장이 이를 보완.
 
+## Agent/Skill 실체화 ✅
+- `agents/*.md` (5 코어) + `packs/core/**/SKILL.md` (10 Skill)로 design/03 구현.
+- 각 Skill/Agent가 **CLI(결정론) ↔ LLM(추론) 경계**를 명시 — CLI가 할 수 있는 것은 CLI로,
+  추론이 필요한 것(업무규칙·adversarial·의미 grounding)만 LLM으로. Skill 우선순위 D22.
+- ⬜ 특정 런타임 어댑터(`adapters/`)로 실제 LLM 에이전트 실행 연결.
+
 ## M6 — 확장 생태계 & 파일럿
 - 도메인/기술 Skill 팩(예: mainframe, spring). 팩 레지스트리.
 - 실제 브라운필드 시스템 파일럿 → 성공 지표 측정(온보딩 시간·time-to-first-PR·버스팩터, `_SYNTHESIS §6`).
