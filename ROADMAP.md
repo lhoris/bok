@@ -60,7 +60,7 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - 멀티레포 aggregator(D05 §7).
 
 ## 장기 가설
-- **BOK가 온보딩 시간을 유의미하게 줄이는가** — Backstage 60→20일(`research/02/backstage.md`)에 준하는 효과를 근거로 검증.
+- **BOK가 온보딩 시간을 유의미하게 줄이는가** — Backstage 60→20일(`research/02-enterprise-onboarding/backstage.md`)에 준하는 효과를 근거로 검증.
 - **"검증되는 LLM Wiki"가 생성-only 도구보다 신뢰를 주는가** — 파일럿에서 잘못된 이해로 인한 사고율 비교.
 
 ## 명시적 비목표 (Non-goals)

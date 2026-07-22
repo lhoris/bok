@@ -8,7 +8,7 @@
 - **Context Model** = 특정 작업을 위해 지식이 **선택·조립·소비되는 방식** (동적, 토큰 예산 안에서).
 
 > 비유: BoK Model은 **도서관**(모든 책과 분류 체계), Context Model은 특정 질문에 답하려 **책상에 펼쳐 놓은 몇 권**.
-> 근거: 이 분리는 Context Engineering의 "finite resource + JIT loading"(`research/01/context-engineering.md`)과 LLM Wiki의 "compile once(BoK), consume via synthesized layer(Context)"(`research/03/knowledge-base-and-llm-wiki.md`)에서 도출.
+> 근거: 이 분리는 Context Engineering의 "finite resource + JIT loading"(`research/01-ai-framework/context-engineering.md`)과 LLM Wiki의 "compile once(BoK), consume via synthesized layer(Context)"(`research/03-knowledge-engineering/knowledge-base-and-llm-wiki.md`)에서 도출.
 
 ---
 
@@ -19,7 +19,7 @@
 BoK의 원자 단위. **하나의 자족적 마크다운 파일** = frontmatter(구조화 메타) + 본문(사람+AI가 읽는 내용).
 
 > 설계 결정 D1 — **"1 지식 = 1 파일 = 1 URL".**
-> 근거: Backstage `catalog-info.yaml`의 "컴포넌트당 정규 주소"(`research/02/backstage.md`) + Skills의 "자족적·이식 가능한 폴더 단위"(`research/01/claude-code-skills.md`) + LLM Wiki의 "저장소에 사는 마크다운"(`research/03/knowledge-base-and-llm-wiki.md`). 벡터DB·외부 인프라 불필요(단순성·vendor-neutral).
+> 근거: Backstage `catalog-info.yaml`의 "컴포넌트당 정규 주소"(`research/02-enterprise-onboarding/backstage.md`) + Skills의 "자족적·이식 가능한 폴더 단위"(`research/01-ai-framework/claude-code-skills.md`) + LLM Wiki의 "저장소에 사는 마크다운"(`research/03-knowledge-engineering/knowledge-base-and-llm-wiki.md`). 벡터DB·외부 인프라 불필요(단순성·vendor-neutral).
 
 ### A.1.1 스키마 (frontmatter)
 
@@ -61,7 +61,7 @@ supersedes:    null
 지식 단위는 **세 개의 독립 축**으로 분류된다. 하나의 계층 트리로 억지로 합치지 않는다(직교성이 라우팅·검증을 단순하게 만든다).
 
 ### A.2.1 축 1 — `kind`: need-type (필수)
-> 근거: Diátaxis 4분면(`research/04/diataxis.md`). "지금 이 지식은 어떤 need를 위한 것인가."
+> 근거: Diátaxis 4분면(`research/04-documentation-architecture/diataxis.md`). "지금 이 지식은 어떤 need를 위한 것인가."
 
 | kind | need | BOK에서의 전형 |
 |------|------|---------------|
@@ -69,19 +69,19 @@ supersedes:    null
 | `explanation` | 이해(왜/개념) | 업무 규칙·설계 근거·ADR — arc42 §4/§9 |
 | `how-to` | 문제해결 | 운영 절차·배포·장애 대응 |
 | `tutorial` | 학습 | 온보딩 여정·첫 기여 가이드 |
-| `glossary` | 용어 | Ubiquitous Language 항목(별도 축, `research/03/domain-modeling.md`) |
+| `glossary` | 용어 | Ubiquitous Language 항목(별도 축, `research/03-knowledge-engineering/domain-modeling.md`) |
 
 ### A.2.2 축 2 — `layer`: 구조 레이어 (선택)
-> 근거: C4 줌 레벨(`research/04/c4-model.md`) + EA 다층(`research/02/enterprise-architecture.md`). Progressive Disclosure를 **구조 지식**에 적용.
+> 근거: C4 줌 레벨(`research/04-documentation-architecture/c4-model.md`) + EA 다층(`research/02-enterprise-onboarding/enterprise-architecture.md`). Progressive Disclosure를 **구조 지식**에 적용.
 
 `context`(시스템 경계) → `container`(앱/데이터스토어) → `component`(내부 모듈) → `data`(데이터 모델) → `business`(역량/프로세스). 비구조 지식은 `null`.
 
 ### A.2.3 축 3 — `context`: bounded context (권장)
-> 근거: DDD Bounded Context(`research/03/domain-modeling.md`). 같은 용어가 다른 의미를 갖는 **의미 경계**. 대규모 BoK를 의미 일관 영역으로 분할 → Context 라우팅의 1차 필터.
+> 근거: DDD Bounded Context(`research/03-knowledge-engineering/domain-modeling.md`). 같은 용어가 다른 의미를 갖는 **의미 경계**. 대규모 BoK를 의미 일관 영역으로 분할 → Context 라우팅의 1차 필터.
 
 ## A.3 confidence — 검증 수준 (필수)
 
-> 근거: BOK의 2번 공백("근거·검증 부재")의 정면 대응. 모든 지식은 **얼마나 믿을 수 있는지**를 명시한다. ADR Status 계열(`research/04/adr.md`) + KG 추출 신뢰(`research/03/knowledge-graph.md`).
+> 근거: BOK의 2번 공백("근거·검증 부재")의 정면 대응. 모든 지식은 **얼마나 믿을 수 있는지**를 명시한다. ADR Status 계열(`research/04-documentation-architecture/adr.md`) + KG 추출 신뢰(`research/03-knowledge-engineering/knowledge-graph.md`).
 
 | confidence | 의미 | 승격 조건 |
 |-----------|------|----------|
@@ -95,13 +95,13 @@ supersedes:    null
 
 ## A.4 provenance — 출처 (필수, 최소 1개)
 
-> 근거: Software Archaeology의 "증거 기반 발굴"(`research/02/software-archaeology.md`) + DeepWiki 소스 접지(`research/03/knowledge-base-and-llm-wiki.md`). **근거 없는 지식은 BoK에 존재할 수 없다.**
+> 근거: Software Archaeology의 "증거 기반 발굴"(`research/02-enterprise-onboarding/software-archaeology.md`) + DeepWiki 소스 접지(`research/03-knowledge-engineering/knowledge-base-and-llm-wiki.md`). **근거 없는 지식은 BoK에 존재할 수 없다.**
 
-`kind ∈ {code, doc, human, runtime, data, external}` + `locator`(파일#라인 / 인터뷰ID / 로그쿼리 / URL) + `note`. 이것이 SECI Externalization의 "무엇에서 표출됐는가"를 기록한다(`research/03/knowledge-management-and-engineering.md`).
+`kind ∈ {code, doc, human, runtime, data, external}` + `locator`(파일#라인 / 인터뷰ID / 로그쿼리 / URL) + `note`. 이것이 SECI Externalization의 "무엇에서 표출됐는가"를 기록한다(`research/03-knowledge-engineering/knowledge-management-and-engineering.md`).
 
 ## A.5 relations — 지식 그래프 (타입 있는 간선)
 
-> 근거: Knowledge Graph 엔티티+관계(`research/03/knowledge-graph.md`) + ADR 결정 사슬(`research/04/adr.md`) + Backstage 소유/의존.
+> 근거: Knowledge Graph 엔티티+관계(`research/03-knowledge-engineering/knowledge-graph.md`) + ADR 결정 사슬(`research/04-documentation-architecture/adr.md`) + Backstage 소유/의존.
 
 핵심 관계 타입(최소 집합, 오버엔지니어링 경계):
 
@@ -111,7 +111,7 @@ supersedes:    null
 
 ## A.6 last_verified & 수명주기
 
-> 근거: SECI 콘텐츠 수명주기 + Phase 2 "카탈로그 부패" 교훈(`research/02/_phase2-synthesis.md`).
+> 근거: SECI 콘텐츠 수명주기 + Phase 2 "카탈로그 부패" 교훈(`research/02-enterprise-onboarding/_phase2-synthesis.md`).
 
 각 KU는 `last_verified` 날짜를 갖고, `kind`별 staleness 임계(예: reference 90일, explanation/glossary 180일, how-to 코드변경 연동)를 넘기면 **confidence 자동 강등 + 재검증 큐**. → "살아있는 BoK".
 
@@ -129,7 +129,7 @@ bok/                          # 대상 저장소에 사는 Body of Knowledge
     coverage.yaml             # arc42 12섹션 커버리지(→ Readiness)
 ```
 
-> 설계 결정 D5 — BoK는 **대상 저장소 안 `bok/`** 에 산다(코드와 함께 버전 관리, docs-like-code). LLM Wiki 패턴(`research/03/knowledge-base-and-llm-wiki.md`).
+> 설계 결정 D5 — BoK는 **대상 저장소 안 `bok/`** 에 산다(코드와 함께 버전 관리, docs-like-code). LLM Wiki 패턴(`research/03-knowledge-engineering/knowledge-base-and-llm-wiki.md`).
 
 ## A.8 catalog.yaml — 컴파일된 인덱스
 
@@ -142,11 +142,11 @@ bok/                          # 대상 저장소에 사는 Body of Knowledge
 ## B.1 목적
 
 BoK 전체를 컨텍스트에 넣는 것은 불가능하다(엔터프라이즈 규모). Context Model은 **주어진 작업(task/need)에 필요한 최소 지식만 조립**한다.
-> 근거: "context는 유한 자원, JIT 로딩, 경량 식별자"(`research/01/context-engineering.md`) + Multi-agent의 "자족적 태스크 서술"(`research/01/multi-agent.md`).
+> 근거: "context는 유한 자원, JIT 로딩, 경량 식별자"(`research/01-ai-framework/context-engineering.md`) + Multi-agent의 "자족적 태스크 서술"(`research/01-ai-framework/multi-agent.md`).
 
 ## B.2 3계층 Progressive Disclosure
 
-> 근거: Claude Skills 3단 로딩(`research/01/claude-code-skills.md`) + C4 줌.
+> 근거: Claude Skills 3단 로딩(`research/01-ai-framework/claude-code-skills.md`) + C4 줌.
 
 | 계층 | 로드 대상 | 토큰 | 언제 |
 |-----|----------|------|------|
@@ -166,7 +166,7 @@ BoK 전체를 컨텍스트에 넣는 것은 불가능하다(엔터프라이즈 �
 4. **Rank & Trim** — 관련성 × confidence로 정렬, 토큰 예산까지. **낮은 confidence는 경고 라벨과 함께 포함**(숨기지 않음).
 5. **Emit Context Pack** — 조립 결과를 B.4 형식으로 반환.
 
-> 설계 결정 D6 — Assembly는 **Orchestrator–Worker의 서브에이전트 태스크 서술**로도 사용된다(`research/01/multi-agent.md`): 각 워커에게 "자족적 목표 + 관련 Context Pack + 출력 형식"을 준다.
+> 설계 결정 D6 — Assembly는 **Orchestrator–Worker의 서브에이전트 태스크 서술**로도 사용된다(`research/01-ai-framework/multi-agent.md`): 각 워커에게 "자족적 목표 + 관련 Context Pack + 출력 형식"을 준다.
 
 ## B.4 Context Pack (조립 산출물)
 
@@ -191,7 +191,7 @@ context_pack:
 ## B.5 사람 vs AI 소비
 
 같은 BoK, 다른 표면:
-- **사람** — 렌더된 위키를 L1→L3로 탐색(TL;DR·다이어그램 중심). 인지 부하↓(`research/02/developer-portal-and-service-catalog.md`).
+- **사람** — 렌더된 위키를 L1→L3로 탐색(TL;DR·다이어그램 중심). 인지 부하↓(`research/02-enterprise-onboarding/developer-portal-and-service-catalog.md`).
 - **AI** — Context Pack을 주입받아 작업. 동일 마크다운·동일 근거.
 > "사람과 AI가 같은 Body of Knowledge를 공유"(헌장) = **하나의 BoK Model, 두 소비 경로.**
 

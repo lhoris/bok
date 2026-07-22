@@ -1,6 +1,6 @@
 # BOK Core Skill Pack
 
-design/03 §2를 실체화한 코어 Skill들. 각 Skill = `SKILL.md`(progressive-disclosure frontmatter: name+description ~100토큰) + 절차 본문. 에이전트가 작업 중 관련 Skill만 로드한다(research/01/claude-code-skills).
+design/03 §2를 실체화한 코어 Skill들. 각 Skill = `SKILL.md`(progressive-disclosure frontmatter: name+description ~100토큰) + 절차 본문. 에이전트가 작업 중 관련 Skill만 로드한다(research/01-ai-framework/claude-code-skills).
 
 ## 구조
 ```

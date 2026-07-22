@@ -17,7 +17,7 @@ python cli/bok.py ready    examples/mini-shop --scope shop --purpose feature
 verified(critical)에 도달하려면 인적 검증(M4)이 필요하다. 이것이 "발굴≠준비"의 실행 증거.
 
 ## `bok discover`가 한 일 (결정론적 아키올로지, LLM 없음)
-> 근거: Software Archaeology(`research/02/software-archaeology.md`) — 저장소 마이닝·변경 히트맵·의존성 복원.
+> 근거: Software Archaeology(`research/02-enterprise-onboarding/software-archaeology.md`) — 저장소 마이닝·변경 히트맵·의존성 복원.
 
 - **import 그래프**(Python `ast`) → 패키지 KU 3개(`pkg-orders/payments/catalog`)와 `depends-on` 관계. `orders`가 `payments`·`catalog`에 의존함을 코드에서 복원.
 - **데이터모델 추출**(SQL DDL `CREATE TABLE`) → 테이블 KU 3개(`table-products/orders/payments`).

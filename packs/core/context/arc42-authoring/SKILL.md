@@ -8,7 +8,7 @@ wraps: null
 # arc42-authoring
 
 ## When to use
-구조 지식(reference)을 사람+AI가 읽을 표준 형식으로 정리할 때. research/04/arc42, /c4-model.
+구조 지식(reference)을 사람+AI가 읽을 표준 형식으로 정리할 때. research/04-documentation-architecture/arc42, /c4-model.
 
 ## Procedure (LLM)
 1. KU의 `layer`에 맞는 arc42 섹션을 채운다: context-and-scope(§3), building-blocks(§5, C4 Container/Component), runtime-behavior(§6), deployment(§7).

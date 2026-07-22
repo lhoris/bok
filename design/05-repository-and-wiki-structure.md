@@ -37,7 +37,7 @@ bok/  (이 repo — 배포물)
     claude-code/  ...
 ```
 
-- 배포: `bok` CLI를 패키지로(예: 단일 바이너리/스크립트). 에이전트·팩은 데이터로 동봉. **인터넷 없이도 코어 동작**(오프라인 우선, KG 기밀성 `research/03/knowledge-graph.md`).
+- 배포: `bok` CLI를 패키지로(예: 단일 바이너리/스크립트). 에이전트·팩은 데이터로 동봉. **인터넷 없이도 코어 동작**(오프라인 우선, KG 기밀성 `research/03-knowledge-engineering/knowledge-graph.md`).
 
 ---
 
@@ -126,7 +126,7 @@ coverage_template: arc42+tdd     # templates/coverage.template.yaml
 > 1. frontmatter `id`는 유지(불변).
 > 2. 물리 경로 변경을 `redirects.yaml`에 기록(옛 경로→새 경로).
 > 3. 모든 `relations.target`은 경로가 아니라 **id로 참조** → 이동해도 간선 무결.
-> 4. `bok compile`이 **dangling relation(존재하지 않는 id)** 을 오류로 검출 → 참조 무결성 강제(KG 품질, `research/03/knowledge-graph.md`).
+> 4. `bok compile`이 **dangling relation(존재하지 않는 id)** 을 오류로 검출 → 참조 무결성 강제(KG 품질, `research/03-knowledge-engineering/knowledge-graph.md`).
 
 - KU 삭제 시: 삭제 대신 `status: deprecated` + `supersedes` 권장. 실삭제는 참조 검사 후.
 - id 재명명은 예외적 — alias를 `redirects.yaml`에 남겨 외부 링크 보존.
@@ -135,7 +135,7 @@ coverage_template: arc42+tdd     # templates/coverage.template.yaml
 
 # 6. Skill 팩 — 배포·버전·해석 우선순위
 
-> 열린 질문 D03-3의 답. 근거: Spec Kit Extensions/Presets/Bundles 오버라이드 계층(`research/01/spec-kit.md`) + BMAD 모듈(`research/01/bmad-method.md`).
+> 열린 질문 D03-3의 답. 근거: Spec Kit Extensions/Presets/Bundles 오버라이드 계층(`research/01-ai-framework/spec-kit.md`) + BMAD 모듈(`research/01-ai-framework/bmad-method.md`).
 
 ## 6.1 팩 구조
 ```
@@ -161,7 +161,7 @@ pack-billing-domain/
 ## 8. Git 통합
 - **pre-commit hook**: 변경된 KU의 frontmatter 스키마 검증(`bok-schema`) + `bok compile`(catalog/graph 갱신) + dangling relation 검사.
 - **staleness**: code locator가 가리키는 파일이 변경된 커밋에서 관련 KU를 재검증 큐에 추가(04 A.2).
-- BoK는 코드와 **같은 PR·리뷰·CI**를 탄다(docs-like-code, `research/02/backstage.md`).
+- BoK는 코드와 **같은 PR·리뷰·CI**를 탄다(docs-like-code, `research/02-enterprise-onboarding/backstage.md`).
 
 ## 9. 헌장 정합
 | 헌장/원칙 | 이 설계 |

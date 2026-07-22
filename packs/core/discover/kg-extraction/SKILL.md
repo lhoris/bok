@@ -8,7 +8,7 @@ wraps: null
 # kg-extraction
 
 ## When to use
-KU 간 관계(의존·정의·결정 사슬)를 구조화해야 할 때. research/03/knowledge-graph.
+KU 간 관계(의존·정의·결정 사슬)를 구조화해야 할 때. research/03-knowledge-engineering/knowledge-graph.
 
 ## Procedure (LLM)
 1. **Extract**: 대상 텍스트에서 엔티티(컴포넌트·용어·결정)와 관계 후보 추출.

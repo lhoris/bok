@@ -8,7 +8,7 @@ wraps: null
 # adr-authoring
 
 ## When to use
-설계 근거·업무 규칙의 "왜"를 기록할 때. research/04/adr (Nygard/MADR).
+설계 근거·업무 규칙의 "왜"를 기록할 때. research/04-documentation-architecture/adr (Nygard/MADR).
 
 ## Procedure (LLM)
 1. **Context**: 문제·드라이버(기능·비기능).

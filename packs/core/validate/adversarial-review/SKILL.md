@@ -8,7 +8,7 @@ wraps: null   # 순수 LLM 추론 — CLI로 대체 불가
 # adversarial-review
 
 ## When to use
-confidence 승격 전, 지식을 공격해 견디는지 볼 때. research/01/bmad-method(Adversarial Review), 헌장 "합의보다 근거".
+confidence 승격 전, 지식을 공격해 견디는지 볼 때. research/01-ai-framework/bmad-method(Adversarial Review), 헌장 "합의보다 근거".
 
 ## Procedure (LLM 루프, D16)
 1. **공격**: 각 주장에 반례·경계조건·누락된 대안·숨은 가정을 제기.

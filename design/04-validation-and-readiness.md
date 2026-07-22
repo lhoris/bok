@@ -63,14 +63,14 @@ corroborated ──(도메인 owner 서명)──▶ verified
 ## B.1 핵심 발상 — Readiness는 목적 상대적(purpose-relative)
 
 > 설계 결정 D17 — **"준비됨"은 절대값이 아니라 "무엇을 위해 준비됐는가"이다.**
-> 근거: TDD는 특정 딜(목적)을 위한 평가(`research/02/technical-due-diligence.md`); Spec Kit 시나리오도 목적별(0→1/현대화, `research/01/spec-kit.md`). 전 시스템을 100% 이해할 필요는 없다 — **하려는 작업의 범위(scope)에 대해** 충분하면 된다.
+> 근거: TDD는 특정 딜(목적)을 위한 평가(`research/02-enterprise-onboarding/technical-due-diligence.md`); Spec Kit 시나리오도 목적별(0→1/현대화, `research/01-ai-framework/spec-kit.md`). 전 시스템을 100% 이해할 필요는 없다 — **하려는 작업의 범위(scope)에 대해** 충분하면 된다.
 
 Readiness는 항상 **scope + 목적**을 받는다:
 `ready(scope: billing 서브시스템, purpose: 신규기능 | 현대화 | 단순이해)`.
 
 ## B.2 coverage.yaml 스키마
 
-시스템 이해의 **커버리지 격자**. arc42 12섹션 + TDD 체크리스트(`research/04/arc42.md`, `research/02/technical-due-diligence.md`)를 **지식 영역(knowledge area)** 으로 정규화.
+시스템 이해의 **커버리지 격자**. arc42 12섹션 + TDD 체크리스트(`research/04-documentation-architecture/arc42.md`, `research/02-enterprise-onboarding/technical-due-diligence.md`)를 **지식 영역(knowledge area)** 으로 정규화.
 
 ```yaml
 # bok/_system/coverage.yaml  (context가 갱신, ready가 평가)

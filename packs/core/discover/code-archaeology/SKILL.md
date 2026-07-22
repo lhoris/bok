@@ -11,7 +11,7 @@ wraps: bok discover
 낯선 코드베이스의 구조와 그 안에 굳은 지식을 캐야 할 때. `bok-discoverer`가 로드.
 
 ## Procedure
-1. **결정론(CLI)**: `bok discover --scope <ctx> --source <dir>` 실행 → 패키지 KU(+depends-on), 데이터모델 KU, 변경열도 우선순위, provenance 자동. (research/02/software-archaeology)
+1. **결정론(CLI)**: `bok discover --scope <ctx> --source <dir>` 실행 → 패키지 KU(+depends-on), 데이터모델 KU, 변경열도 우선순위, provenance 자동. (research/02-enterprise-onboarding/software-archaeology)
 2. **추론(LLM)** — CLI가 남긴 `## 열린 질문`을 채운다:
    - **hot 코드**(변경열도 상위)부터 읽어 **업무 규칙 후보**를 추출(business process archaeology). 근거: 조건 분기·검증 로직·예외 처리.
    - 커밋 메시지·이슈·주석에서 **"왜"(의도)** 를 추론 → `explanation` KU 초안.

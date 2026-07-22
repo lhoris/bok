@@ -12,7 +12,7 @@ wraps: null   # 순수 LLM/사람 — CLI 결정론 부분 없음
 
 ## Procedure (LLM + 사람)
 1. **대상 식별**: `bok ready`의 gap + `code-archaeology`의 `## 열린 질문` + 버스팩터 높은 영역(단일 human 의존).
-2. **가이드 생성**: 해당 영역의 **인터뷰 질문지** 또는 **Event Storming** 세션 가이드 작성(도메인 이벤트→bounded context, research/03/domain-modeling).
+2. **가이드 생성**: 해당 영역의 **인터뷰 질문지** 또는 **Event Storming** 세션 가이드 작성(도메인 이벤트→bounded context, research/03-knowledge-engineering/domain-modeling).
 3. **표출**: 사람의 답변/워크숍 결과를 KU로 구조화 — provenance `kind: human, locator: interview/<id>`, confidence `inferred`(단일 발화) 또는 교차 시 `corroborated`.
 4. **용어 수집**: 등장한 도메인 용어를 `glossary` KU(Ubiquitous Language)로.
 

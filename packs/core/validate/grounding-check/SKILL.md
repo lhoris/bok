@@ -8,7 +8,7 @@ wraps: bok validate
 # grounding-check
 
 ## When to use
-지식을 신뢰하기 전, 근거 접지를 확인할 때. research/03/knowledge-base-and-llm-wiki(소스 접지).
+지식을 신뢰하기 전, 근거 접지를 확인할 때. research/03-knowledge-engineering/knowledge-base-and-llm-wiki(소스 접지).
 
 ## Procedure (CLI ↔ LLM)
 1. **결정론(CLI)**: `bok validate --scope <ctx>` — provenance 파일 존재 검사. 없으면 강등(→unverified).
