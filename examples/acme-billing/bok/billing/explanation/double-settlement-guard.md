@@ -5,7 +5,7 @@ kind:          explanation
 layer:         component
 context:       billing
 status:        active
-confidence:    corroborated          # owner 서명 전 — verified 미달 (critical 영역)
+confidence:    verified
 provenance:
   - kind: code
     locator: src/billing/settle.py#L120-L180
@@ -18,8 +18,8 @@ relations:
     target: bok://billing/reference/settlement-batch
   - type: defines-term
     target: bok://billing/glossary/idempotency-key
-owner:         team-billing
-last_verified: 2026-07-18
+owner:    kim
+last_verified:    2026-07-22
 supersedes:    null
 ---
 

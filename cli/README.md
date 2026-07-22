@@ -38,10 +38,17 @@ python cli/bok.py compile examples/acme-billing
 python cli/bok.py ready   examples/acme-billing --scope billing --purpose feature
 ```
 
+- **validate** (M3, design/02 §3 + design/04 A): grounding-check (provenance
+  files must exist → else demote), cross-support auto-promotion
+  (`inferred`→`corroborated` when ≥2 distinct-kind provenance), staleness
+  demotion, contradiction cap, and `--sign` owner sign-off (`corroborated`→
+  `verified`, human-in-the-loop). Rewrites only the `confidence` line in place.
+
 ## Scope
-In: init, discover (deterministic archaeology), status, compile, schema check,
-dangling detection, ready (lights/hard-gate/score/tier), pre-commit hook.
-Out (later milestones): context (canonicalize/type), validate, staleness, assemble.
+In: init, discover, validate, status, compile, schema/dangling checks, ready,
+pre-commit hook.
+Out (later milestones): context (canonicalize/type), LLM adversarial reasoning,
+assemble.
 
 ## M2 Findings (검증 결과)
 `bok discover`를 `examples/mini-shop`에 돌려 6개 후보 KU를 자동 생성했다.
@@ -50,6 +57,19 @@ Out (later milestones): context (canonicalize/type), validate, staleness, assemb
 - 도구가 **코드로 알 수 있는 것(구조·의존·테이블)과 없는 것(업무 규칙·의도)을 스스로 구분**하고
   후자를 `## 열린 질문`에 명시 → human-externalization(M4)의 대상을 자동 표식.
 - **발굴 ≠ 이해 ≠ 준비**가 실행으로 증명됨. 이것이 생성-only 도구(DeepWiki류)와의 분기점.
+
+## M3 Findings (검증 결과)
+`bok validate`로 검증 게이트(BOK의 핵심 차별점)를 실증했다.
+- **Owner 서명이 readiness gap을 닫았다.** acme-billing에서 `ready`가 지목한
+  "double-settlement-guard는 owner 검증 필요" → `validate --sign`으로 verified 승격
+  → business-rules amber→**green**, score 29→**36**. 단, data-model(critical) red 때문에
+  hard gate는 여전히 FAIL — **정직하게 아직 NOT READY**. 이것이 BOK의 요체.
+- **Cross-support는 자동, verified는 사람.** 서로 다른 kind의 근거 2+ → 자동 corroborated
+  (mini-shop payments). verified는 반드시 `--sign`(human-in-the-loop) 경유 — 자동 불가.
+- **Grounding은 근거 없는 지식을 잡는다.** provenance 파일이 실제로 없으면 강등(→unverified).
+  "근거 우선"이 규칙이 아니라 실행되는 게이트임을 증명.
+- 결정론적 체크(grounding/cross-support/staleness/contradiction)는 단일 패스로 종결.
+  LLM 기반 adversarial 추론 루프(D16 fixpoint)는 에이전트 레벨 이후 과제.
 
 ---
 

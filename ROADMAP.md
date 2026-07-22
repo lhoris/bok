@@ -24,10 +24,13 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - **검증 답**: 자동 발굴 = 전부 `inferred`/`draft`. 발굴≠준비(ready still R0). 도구가
   "코드로 모르는 것(왜)"을 스스로 표식 → M4 인적 발굴 대상 자동 식별. 상세: `cli/README.md` M2 Findings.
 
-## M3 — Validate (검증 루프)
-- `grounding-check`·`adversarial-review`·`contradiction-detection`.
-- confidence 전이 + staleness 강등(git hook 연동).
-- **검증 질문**: adversarial fixpoint 종료(D16)가 실제로 수렴하는가.
+## M3 — Validate (검증 루프) 🔄
+- ✅ `bok validate`: grounding-check(근거 파일 존재→없으면 강등), cross-support
+  자동 승격(inferred→corroborated), staleness 강등, contradiction cap,
+  `--sign` owner 서명(corroborated→verified, human-in-the-loop). 실증: acme+mini-shop.
+- ⬜ LLM `adversarial-review` 추론 루프(에이전트 레벨), git hook staleness 자동 트리거.
+- **검증 답**: 결정론 체크는 단일 패스로 종결. 서명이 readiness gap을 실제로 닫음
+  (business-rules→green, score 29→36) 하되 hard gate는 정직하게 유지. 상세: `cli/README.md` M3.
 
 ## M4 — Human Externalization
 - 인터뷰/Event Storming 가이드 생성·요약 → human provenance KU.

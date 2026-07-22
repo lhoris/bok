@@ -8,7 +8,7 @@
 | area | criticality | status |
 |------|:-:|:-:|
 | context-and-scope | high | amber |
-| business-rules | critical | amber |
+| business-rules | critical | green |
 | data-model | critical | red |
 | runtime-behavior | high | red |
 | deployment-ops | normal | red |
@@ -19,14 +19,13 @@
 | team-bus-factor | high | red |
 
 ## 3. Score
-29 / 100
+36 / 100
 
 ## 4. Tier
 **R0 (below Mapped)** (목표 R3)
 
 ## 5. Gaps (→ 다음 discover, design/02 D8)
 - context-and-scope
-- business-rules
 - data-model
 - runtime-behavior
 - deployment-ops

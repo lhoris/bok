@@ -23,7 +23,7 @@ units:
   kind: reference
   layer: component
   context: shop
-  confidence: inferred
+  confidence: corroborated
   relations: []
 - id: bok://shop/reference/table-orders
   title: orders 테이블

@@ -5,11 +5,14 @@ kind: reference
 layer: component
 context: shop
 status: draft
-confidence: inferred
+confidence:    corroborated
 provenance:
 - kind: code
   locator: src/payments/gateway.py
   note: auto-discovered module
+- kind: human
+  locator: interview/2026-07-22-payments-lead
+  note: "curator가 추가 — 외부 PSP 연동 정책 확인 (cross-source)"
 relations: []
 owner: unassigned
 last_verified: '1970-01-01'

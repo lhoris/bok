@@ -7,7 +7,7 @@ units:
   kind: explanation
   layer: component
   context: billing
-  confidence: corroborated
+  confidence: verified
   relations:
   - derived-from:bok://billing/reference/settlement-batch
   - defines-term:bok://billing/glossary/idempotency-key
