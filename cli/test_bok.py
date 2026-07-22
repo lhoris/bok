@@ -242,6 +242,12 @@ class RepoFrontmatterTest(unittest.TestCase):
     def test_adapter_commands(self):
         self._check("adapters/claude-code/commands/*.md", need_name=False)
 
+    def test_codex_prompts(self):
+        self._check("adapters/codex/prompts/*.md", need_name=False)
+
+    def test_copilot_prompts(self):
+        self._check("adapters/github-copilot/prompts/*.prompt.md", need_name=False)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

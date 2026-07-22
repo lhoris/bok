@@ -52,8 +52,10 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - `agents/*.md` (5 코어) + `packs/core/**/SKILL.md` (10 Skill)로 design/03 구현.
 - 각 Skill/Agent가 **CLI(결정론) ↔ LLM(추론) 경계**를 명시 — CLI가 할 수 있는 것은 CLI로,
   추론이 필요한 것(업무규칙·adversarial·의미 grounding)만 LLM으로. Skill 우선순위 D22.
-- 🔄 런타임 어댑터: `adapters/claude-code/` — 5 subagent + 6 슬래시 커맨드 + install 스크립트
-  (형식 검증됨; 라이브 LLM 실행 파일럿은 M6). CLI(결정론)는 `cli/test_bok.py`로 검증.
+- 🔄 런타임 어댑터 — **Codex · Claude Code · GitHub Copilot** 3종. 공용 `adapters/AGENTS.md`(두뇌)
+  + 도구별 슬래시 커맨드 6개씩(얇은 포인터) + install 스크립트. 세 도구 모두 AGENTS.md·Agent Skills를
+  읽으므로 `packs/core/**/SKILL.md`가 공용. 형식·설치 검증됨(installer dry-run, frontmatter 린트);
+  라이브 LLM 실행 파일럿은 M6. CLI(결정론)는 `cli/test_bok.py` 20 테스트로 검증.
 
 ## M6 — 확장 생태계 & 파일럿
 - 도메인/기술 Skill 팩(예: mainframe, spring). 팩 레지스트리.
