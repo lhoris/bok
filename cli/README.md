@@ -11,6 +11,7 @@ python cli/bok.py init     <project> --project NAME --context CTX  # scaffold bo
 python cli/bok.py discover <project> --scope S --source src        # mine candidate KUs from code
 python cli/bok.py context  <project> --scope S           # structure: map KUs -> coverage areas
 python cli/bok.py validate <project> [--scope S] [--sign ID --owner N]  # grounding + confidence
+python cli/bok.py assemble <project> --scope S --goal "..." [--need K --budget N]  # Context Pack
 python cli/bok.py status   <project>                     # KU count, confidence dist, dangling
 python cli/bok.py compile  <project>                     # authored KUs -> catalog.yaml + graph.json
 python cli/bok.py ready    <project> --scope S --purpose P # coverage -> lights -> hard gate -> tier
@@ -50,11 +51,18 @@ python cli/bok.py ready   examples/acme-billing --scope billing --purpose featur
   demotion, contradiction cap, and `--sign` owner sign-off (`corroborated`→
   `verified`, human-in-the-loop). Rewrites only the `confidence` line in place.
 
+- **assemble** (design/01 B.3/B.4): builds a per-task **Context Pack** —
+  filter by bounded context → seed by goal relevance → expand along relations
+  → rank by relevance×confidence → trim to token budget (degrades L3→L2 before
+  dropping). Emits included units, low-confidence **warnings**, and explicit
+  **gaps** (dangling targets + empty coverage areas) so an AI is handed what is
+  *not* known before it acts. Reproduces the design/01 B.4 example on real data.
+
 ## Scope
-In: init, discover, validate, status, compile, schema/dangling checks, ready,
-pre-commit hook.
-Out (later milestones): context (canonicalize/type), LLM adversarial reasoning,
-assemble.
+In: the full pipeline — init, discover, context, validate, assemble, status,
+compile, schema/dangling checks, ready, pre-commit hook.
+Out (needs LLM/agents): business-rule inference, human-interview externalization,
+adversarial reasoning loop, embedding-based relevance.
 
 ## M2 Findings (검증 결과)
 `bok discover`를 `examples/mini-shop`에 돌려 6개 후보 KU를 자동 생성했다.

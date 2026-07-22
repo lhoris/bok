@@ -39,10 +39,14 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - `verified` owner 서명 워크플로우.
 - **검증 질문**: 암묵지(90%) 흡수가 버스팩터 지표를 실제로 낮추는가.
 
-## M5 — Context Assembly & AI 소비
-- `bok assemble` → Context Pack(gaps 포함, D01 B.4).
-- 에이전트가 Context Pack으로 실제 개발 태스크 수행하는 레퍼런스 통합.
-- **검증 질문**: 임베딩 없이(제목·TL;DR·relations) 조립 관련성이 충분한가(D01 D-3).
+## M5 — Context Assembly & AI 소비 🔄
+- ✅ `bok assemble` → Context Pack(units + warnings + **gaps**, D01 B.4). filter→
+  seed→expand(relations)→rank(relevance×confidence)→budget trim. acme에서
+  design/01 B.4 예제를 실제 데이터로 재현.
+- ⬜ 에이전트가 Context Pack으로 실제 개발 태스크 수행하는 레퍼런스 통합.
+- **검증 답(D01 D-3)**: 키워드 관련성은 동작하나 한계 노출 — mini-shop에서 goal이
+  boilerplate 단어("변경열도")에 매칭됨. **정밀 관련성엔 임베딩 필요**(향후). 현재는
+  relations 확장이 이를 보완.
 
 ## M6 — 확장 생태계 & 파일럿
 - 도메인/기술 Skill 팩(예: mainframe, spring). 팩 레지스트리.
