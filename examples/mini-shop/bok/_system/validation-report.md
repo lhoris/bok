@@ -4,7 +4,7 @@
 _생성: 2026-07-22 · KUs: 6_
 
 ## Transitions
-- bok://shop/reference/pkg-payments: inferred → **corroborated**
+- (변화 없음)
 
 ## Grounding failures (근거 파일 없음 → 강등)
 - (없음)
@@ -15,4 +15,4 @@ _생성: 2026-07-22 · KUs: 6_
 ## Contradictions (검증 대기)
 - (없음)
 
-## 남은 미검증(<= inferred): 6 / 6
+## 남은 미검증(<= inferred): 5 / 6

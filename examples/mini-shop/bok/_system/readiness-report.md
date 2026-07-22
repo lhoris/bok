@@ -9,7 +9,7 @@
 |------|:-:|:-:|
 | context-and-scope | high | red |
 | solution-strategy | normal | red |
-| building-blocks | high | red |
+| building-blocks | high | amber |
 | runtime-behavior | high | red |
 | deployment-ops | normal | red |
 | crosscutting-concepts | normal | red |
@@ -24,7 +24,7 @@
 | team-bus-factor | high | red |
 
 ## 3. Score
-0 / 100
+4 / 100
 
 ## 4. Tier
 **R0 (below Mapped)** (목표 R3)

@@ -9,6 +9,8 @@ by hand — proving the design's models connect into one runnable flow.
 ```bash
 python cli/bok.py init     <project> --project NAME --context CTX  # scaffold bok/ + bok.yaml
 python cli/bok.py discover <project> --scope S --source src        # mine candidate KUs from code
+python cli/bok.py context  <project> --scope S           # structure: map KUs -> coverage areas
+python cli/bok.py validate <project> [--scope S] [--sign ID --owner N]  # grounding + confidence
 python cli/bok.py status   <project>                     # KU count, confidence dist, dangling
 python cli/bok.py compile  <project>                     # authored KUs -> catalog.yaml + graph.json
 python cli/bok.py ready    <project> --scope S --purpose P # coverage -> lights -> hard gate -> tier
@@ -38,6 +40,10 @@ python cli/bok.py compile examples/acme-billing
 python cli/bok.py ready   examples/acme-billing --scope billing --purpose feature
 ```
 
+- **context** (design/02 §2, design/04 B.2): the missing link between discover
+  and ready — deterministically maps each KU to coverage area(s) by kind/layer
+  (union, preserving authored criticality/open_gap), plus duplicate-title
+  canonicalize warnings. Turns discovered KUs into a populated coverage grid.
 - **validate** (M3, design/02 §3 + design/04 A): grounding-check (provenance
   files must exist → else demote), cross-support auto-promotion
   (`inferred`→`corroborated` when ≥2 distinct-kind provenance), staleness

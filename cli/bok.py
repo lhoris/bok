@@ -570,6 +570,81 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
     return 0
 
 
+# ---------------------------------------------------------------- context
+
+def area_for(ku: KU) -> list[str]:
+    """Deterministic KU -> coverage-area mapping (design/04 B.2 / D04 F-1).
+
+    Heuristic by kind then layer; humans can add/override in coverage.yaml.
+    """
+    kind = ku.meta.get("kind")
+    if kind == "glossary":
+        return ["glossary-ubiquitous-lang"]
+    if kind == "explanation":
+        return ["decisions-rationale"]
+    if kind == "how-to":
+        return ["deployment-ops"]
+    if kind == "tutorial":
+        return []
+    layer_map = {
+        "data": "data-model", "component": "building-blocks",
+        "container": "building-blocks", "context": "context-and-scope",
+        "business": "business-rules",
+    }
+    return [layer_map.get(ku.meta.get("layer"), "building-blocks")]
+
+
+def cmd_context(root: pathlib.Path, scope: str) -> int:
+    cfg, kus, errors = load_project(root)
+    if errors:
+        print("SCHEMA ERRORS (fix before context):")
+        for e in errors:
+            print("  -", e)
+        return 1
+    kus = [k for k in kus if k.meta.get("context") == scope]
+
+    cov_path = root / "bok" / "_system" / "coverage.yaml"
+    if cov_path.exists():
+        cov = yaml.safe_load(cov_path.read_text(encoding="utf-8")) or {}
+    else:
+        tmpl = (TEMPLATES / "coverage.arc42-tdd.yaml").read_text(encoding="utf-8")
+        cov = yaml.safe_load(tmpl.replace("scope: CHANGEME", f"scope: {scope}"))
+    areas = {a["id"]: a for a in cov.get("areas", [])}
+
+    added, missing = [], set()
+    # canonicalize: duplicate-title detection (light)
+    titles: dict[str, str] = {}
+    dups = []
+    for k in kus:
+        t = k.meta.get("title")
+        if t in titles:
+            dups.append((k.id, titles[t]))
+        else:
+            titles[t] = k.id
+        for aid in area_for(k):
+            if aid not in areas:
+                missing.add(aid); continue
+            lst = areas[aid].get("kus") or []
+            if k.id not in lst:
+                lst.append(k.id); areas[aid]["kus"] = lst; added.append((k.id, aid))
+
+    cov["areas"] = list(areas.values())
+    header = ("# SEMI-GENERATED: `bok context` maps KUs->areas (union, preserves\n"
+              "# authored criticality/open_gap). status는 `bok ready`가 계산.\n")
+    cov_path.write_text(header + yaml.safe_dump(cov, allow_unicode=True, sort_keys=False), encoding="utf-8")
+
+    filled = sum(1 for a in cov["areas"] if a.get("kus"))
+    print(f"context: mapped {len(added)} KU->area link(s); coverage {filled}/{len(cov['areas'])} areas filled.")
+    for kid, aid in added:
+        print(f"  {aid}  <- {kid}")
+    if missing:
+        print(f"  note: {len(missing)} target area(s) absent in coverage: {sorted(missing)}")
+    if dups:
+        print(f"  WARNING: {len(dups)} duplicate title(s) — canonicalize candidates: {dups}")
+    print("next: `bok validate` then `bok ready`.")
+    return 0
+
+
 # ---------------------------------------------------------------- init
 
 def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int:
@@ -648,6 +723,9 @@ def main(argv=None) -> int:
     pd.add_argument("path", nargs="?", default=".")
     pd.add_argument("--scope", required=True)
     pd.add_argument("--source", default="src")
+    px = sub.add_parser("context", help="structure KUs: map to coverage areas + canonicalize")
+    px.add_argument("path", nargs="?", default=".")
+    px.add_argument("--scope", required=True)
     pc = sub.add_parser("compile", help="compile catalog/graph + schema/dangling check")
     pc.add_argument("path", nargs="?", default=".")
     pv = sub.add_parser("validate", help="grounding + confidence transitions + sign-off")
@@ -668,6 +746,8 @@ def main(argv=None) -> int:
         return cmd_init(root, args.project, args.context, args.force)
     if args.cmd == "discover":
         return cmd_discover(root, args.scope, args.source)
+    if args.cmd == "context":
+        return cmd_context(root, args.scope)
     if args.cmd == "compile":
         return cmd_compile(root)
     if args.cmd == "validate":

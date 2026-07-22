@@ -5,7 +5,9 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 ## 상태 요약
 - ✅ **조사(Research)** — 20+ 프레임워크, 4개 카테고리, `research/` + `_SYNTHESIS.md`.
 - ✅ **설계(Design)** — `design/01–06`, 예제 `examples/acme-billing/`.
-- ⬜ **구현(Implementation)** — 아래 M1~.
+- 🔄 **구현(Implementation)** — **핵심 4-커맨드 파이프라인 실행 가능**:
+  `discover → context → validate → ready` (+ init/status/compile). mini-shop에서
+  나선 한 바퀴 전체가 도구로 자동 실행됨. LLM 기반 추론(업무규칙·adversarial)은 잔여.
 
 ## M1 — Walking Skeleton (최소 동작 CLI) ✅
 목표: `examples/acme-billing`을 손이 아니라 도구로 재생성.
