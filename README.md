@@ -78,6 +78,10 @@ examples/    실증 — acme-billing(손+검증), mini-shop(전자동 발굴)
 CONTRIBUTING.md · ROADMAP.md
 ```
 
+## 써보기
+
+실제 사용법은 **[QUICKSTART.md](QUICKSTART.md)** 참고 — `init → discover → context → compile → ready` 5단계.
+
 ## 시작하기 (읽는 순서)
 
 1. **왜/무엇** — [`research/_SYNTHESIS.md`](research/_SYNTHESIS.md) (설계의 근거·결론)
