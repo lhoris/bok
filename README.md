@@ -72,6 +72,7 @@ design/      설계 — 01 BoK/Context 모델 … 06 예제·로드맵 (결정 D
 cli/         구현 — `bok` CLI 8커맨드 (결정론 코어)
 agents/      5 코어 에이전트 (CLI↔LLM 경계 정의)
 packs/core/  10 코어 Skill (progressive disclosure)
+adapters/    런타임 바인딩 — Claude Code subagent + 슬래시 커맨드
 templates/   KU·coverage·hook 템플릿
 examples/    실증 — acme-billing(손+검증), mini-shop(전자동 발굴)
 CONTRIBUTING.md · ROADMAP.md

@@ -211,5 +211,37 @@ class BokTest(unittest.TestCase):
         self.assertEqual(bok.compute_status("normal", ["authoritative"], cfg, open_gap=True), "amber")
 
 
+class RepoFrontmatterTest(unittest.TestCase):
+    """Every shipped agent/skill/adapter markdown must have parseable
+    frontmatter with a name/description — guards the docs (this catches the
+    YAML-quoting bugs found during authoring)."""
+
+    ROOT = pathlib.Path(__file__).resolve().parent.parent
+
+    def _check(self, glob, need_name=True):
+        import yaml
+        files = list(self.ROOT.glob(glob))
+        self.assertTrue(files, f"no files matched {glob}")
+        for f in files:
+            parts = f.read_text(encoding="utf-8").split("---", 2)
+            self.assertGreaterEqual(len(parts), 3, f"{f}: no frontmatter")
+            fm = yaml.safe_load(parts[1])
+            self.assertTrue(fm.get("description"), f"{f}: missing description")
+            if need_name:
+                self.assertTrue(fm.get("name"), f"{f}: missing name")
+
+    def test_core_skills(self):
+        self._check("packs/core/**/SKILL.md")
+
+    def test_framework_agents(self):
+        self._check("agents/bok-*.md")
+
+    def test_adapter_agents(self):
+        self._check("adapters/claude-code/agents/*.md")
+
+    def test_adapter_commands(self):
+        self._check("adapters/claude-code/commands/*.md", need_name=False)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
