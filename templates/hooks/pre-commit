@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# BOK pre-commit hook (design/05 §8): schema + dangling gate before commit.
+# Install: copy to .git/hooks/pre-commit (chmod +x), or `bok init` offers it.
+set -e
+echo "[bok] compiling + validating Body of Knowledge..."
+python cli/bok.py compile . || {
+  echo "[bok] BLOCKED: KU schema errors or dangling relations. Fix before committing."
+  exit 1
+}
+echo "[bok] ok."

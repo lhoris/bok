@@ -7,6 +7,8 @@ by hand — proving the design's models connect into one runnable flow.
 ## Commands
 
 ```bash
+python cli/bok.py init    <project> --project NAME --context CTX  # scaffold bok/ + bok.yaml
+python cli/bok.py status  <project>                      # KU count, confidence dist, dangling
 python cli/bok.py compile <project>                      # authored KUs -> catalog.yaml + graph.json
 python cli/bok.py ready   <project> --scope S --purpose P # coverage -> lights -> hard gate -> tier
 ```
@@ -29,7 +31,8 @@ python cli/bok.py ready   examples/acme-billing --scope billing --purpose featur
 ```
 
 ## Scope
-In: compile, schema check, dangling detection, ready (lights/hard-gate/score/tier).
+In: init, status, compile, schema check, dangling detection, ready
+(lights/hard-gate/score/tier), pre-commit hook template.
 Out (later milestones): discover, context, validate, staleness, assemble.
 
 ---

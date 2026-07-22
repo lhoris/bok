@@ -21,6 +21,9 @@ import sys
 
 import yaml
 
+FRAMEWORK_ROOT = pathlib.Path(__file__).resolve().parent.parent
+TEMPLATES = FRAMEWORK_ROOT / "templates"
+
 # ---------------------------------------------------------------- model
 
 CONFIDENCE_ORDER = ["unverified", "inferred", "corroborated", "verified", "authoritative"]
@@ -286,6 +289,65 @@ def cmd_ready(root: pathlib.Path, scope: str, purpose: str) -> int:
     return 0 if verdict == "READY" else 2
 
 
+# ---------------------------------------------------------------- init
+
+def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int:
+    cfg_path = root / "bok.yaml"
+    if cfg_path.exists() and not force:
+        print(f"refusing: {cfg_path} already exists (use --force to overwrite config)")
+        return 1
+    root.mkdir(parents=True, exist_ok=True)
+
+    cfg_text = (TEMPLATES / "bok.template.yaml").read_text(encoding="utf-8")
+    cfg_text = cfg_text.replace("project: CHANGEME", f"project: {project}")
+    cfg_text = cfg_text.replace("- id: core", f"- id: {context}")
+    cfg_path.write_text(cfg_text, encoding="utf-8")
+
+    for kind in ("reference", "explanation", "how-to", "tutorial", "glossary"):
+        d = root / "bok" / context / kind
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitkeep").write_text("", encoding="utf-8")
+
+    sysdir = root / "bok" / "_system"
+    sysdir.mkdir(parents=True, exist_ok=True)
+    cov = (TEMPLATES / "coverage.arc42-tdd.yaml").read_text(encoding="utf-8")
+    cov = cov.replace("scope: CHANGEME", f"scope: {context}")
+    (sysdir / "coverage.yaml").write_text(cov, encoding="utf-8")
+
+    (root / "bok" / "_system" / ".gitkeep").write_text("", encoding="utf-8")
+    print(f"initialized BOK at {root}")
+    print(f"  bok.yaml (project={project}, context={context})")
+    print(f"  bok/{context}/<kind>/  + bok/_system/coverage.yaml (arc42+tdd)")
+    print("next: author KUs (templates/ku.template.md), then `bok compile` + `bok ready`.")
+    print("hook: cp templates/hooks/pre-commit .git/hooks/pre-commit  (schema/dangling gate)")
+    return 0
+
+
+# ---------------------------------------------------------------- status
+
+def cmd_status(root: pathlib.Path) -> int:
+    cfg, kus, errors = load_project(root)
+    dist: dict[str, int] = {c: 0 for c in CONFIDENCE_ORDER}
+    for k in kus:
+        c = k.meta.get("confidence", "")
+        if c in dist:
+            dist[c] += 1
+    ids = {k.id for k in kus}
+    dangling = sum(
+        1 for k in kus for _, tgt in k.relations() if tgt not in ids
+    )
+    print(f"project: {cfg.get('project')}  |  KUs: {len(kus)}  |  schema errors: {len(errors)}")
+    print("confidence: " + ", ".join(f"{c}={dist[c]}" for c in CONFIDENCE_ORDER))
+    print(f"dangling relations: {dangling}")
+    cov_path = root / "bok" / "_system" / "coverage.yaml"
+    if cov_path.exists():
+        cov = yaml.safe_load(cov_path.read_text(encoding="utf-8")) or {}
+        n = len(cov.get("areas", []))
+        filled = sum(1 for a in cov.get("areas", []) if a.get("kus"))
+        print(f"coverage areas: {filled}/{n} have >=1 KU")
+    return 1 if errors else 0
+
+
 # ---------------------------------------------------------------- cli
 
 def main(argv=None) -> int:
@@ -296,8 +358,15 @@ def main(argv=None) -> int:
             pass
     p = argparse.ArgumentParser(prog="bok", description="Body of Knowledge CLI (M1)")
     sub = p.add_subparsers(dest="cmd", required=True)
+    pi = sub.add_parser("init", help="scaffold bok/ + bok.yaml from templates")
+    pi.add_argument("path", nargs="?", default=".")
+    pi.add_argument("--project", default="my-system")
+    pi.add_argument("--context", default="core")
+    pi.add_argument("--force", action="store_true")
     pc = sub.add_parser("compile", help="compile catalog/graph + schema/dangling check")
     pc.add_argument("path", nargs="?", default=".")
+    ps = sub.add_parser("status", help="quick BoK dashboard")
+    ps.add_argument("path", nargs="?", default=".")
     pr = sub.add_parser("ready", help="evaluate Development Readiness")
     pr.add_argument("path", nargs="?", default=".")
     pr.add_argument("--scope", required=True)
@@ -305,8 +374,12 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     root = pathlib.Path(args.path).resolve()
+    if args.cmd == "init":
+        return cmd_init(root, args.project, args.context, args.force)
     if args.cmd == "compile":
         return cmd_compile(root)
+    if args.cmd == "status":
+        return cmd_status(root)
     if args.cmd == "ready":
         return cmd_ready(root, args.scope, args.purpose)
     return 1
