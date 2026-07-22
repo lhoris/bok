@@ -16,11 +16,13 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
 - **검증 답**: 완결성은 confidence만으로 계산 불가 → `open_gap` 저작 플래그로 해소.
   자동 영역↔KU 매핑 정확도는 M2(discover) 이후 실측. 상세: `cli/README.md` M1 Findings.
 
-## M2 — Discover (근거 발굴)
-- `code-archaeology` Skill: 의존성·변경 히트맵·데이터모델 추출 → 후보 KU(provenance 자동).
-- `kg-extraction` Skill: 엔티티·관계 추출.
-- Orchestrator–Worker 병렬(발굴 한정, 비용 통제).
-- **검증 질문**: 자동 발굴 KU의 초기 confidence 분포와 사람 수정 비용.
+## M2 — Discover (근거 발굴) 🔄
+- ✅ `bok discover` 결정론적 아키올로지(LLM 없음): import 그래프→패키지 KU+depends-on,
+  SQL DDL→데이터모델 KU, git 변경 히트맵→우선순위. provenance 자동, idempotent.
+  실증: `examples/mini-shop/`.
+- ⬜ LLM 기반 업무 규칙 추론·`kg-extraction` 심화(에이전트 레벨), Orchestrator–Worker 병렬.
+- **검증 답**: 자동 발굴 = 전부 `inferred`/`draft`. 발굴≠준비(ready still R0). 도구가
+  "코드로 모르는 것(왜)"을 스스로 표식 → M4 인적 발굴 대상 자동 식별. 상세: `cli/README.md` M2 Findings.
 
 ## M3 — Validate (검증 루프)
 - `grounding-check`·`adversarial-review`·`contradiction-detection`.

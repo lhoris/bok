@@ -7,11 +7,19 @@ by hand — proving the design's models connect into one runnable flow.
 ## Commands
 
 ```bash
-python cli/bok.py init    <project> --project NAME --context CTX  # scaffold bok/ + bok.yaml
-python cli/bok.py status  <project>                      # KU count, confidence dist, dangling
-python cli/bok.py compile <project>                      # authored KUs -> catalog.yaml + graph.json
-python cli/bok.py ready   <project> --scope S --purpose P # coverage -> lights -> hard gate -> tier
+python cli/bok.py init     <project> --project NAME --context CTX  # scaffold bok/ + bok.yaml
+python cli/bok.py discover <project> --scope S --source src        # mine candidate KUs from code
+python cli/bok.py status   <project>                     # KU count, confidence dist, dangling
+python cli/bok.py compile  <project>                     # authored KUs -> catalog.yaml + graph.json
+python cli/bok.py ready    <project> --scope S --purpose P # coverage -> lights -> hard gate -> tier
 ```
+
+- **discover** (M2, design/02 §1 + research/02 software-archaeology): deterministic
+  archaeology (no LLM) — Python `ast` import graph -> package KUs + depends-on
+  relations; SQL `CREATE TABLE` -> data-model KUs; git change-heatmap (LOC
+  fallback) -> priority. Emits `confidence: inferred`, `status: draft` KUs with
+  code provenance; idempotent (never clobbers existing ids). See
+  `examples/mini-shop/`.
 
 - **compile** (design/05 D20/D21): parses every `bok/<context>/**/*.md`, validates
   the KU schema (required fields, valid `kind`/`confidence`, `provenance` ≥ 1),
@@ -31,9 +39,17 @@ python cli/bok.py ready   examples/acme-billing --scope billing --purpose featur
 ```
 
 ## Scope
-In: init, status, compile, schema check, dangling detection, ready
-(lights/hard-gate/score/tier), pre-commit hook template.
-Out (later milestones): discover, context, validate, staleness, assemble.
+In: init, discover (deterministic archaeology), status, compile, schema check,
+dangling detection, ready (lights/hard-gate/score/tier), pre-commit hook.
+Out (later milestones): context (canonicalize/type), validate, staleness, assemble.
+
+## M2 Findings (검증 결과)
+`bok discover`를 `examples/mini-shop`에 돌려 6개 후보 KU를 자동 생성했다.
+- **초기 confidence는 전부 `inferred`** (단일 자동 근거). ROADMAP M2의 검증 질문에 대한 답:
+  자동 발굴은 초안을 주지만 신뢰를 주지 않는다 — `ready`는 여전히 NOT READY(R0, score 0).
+- 도구가 **코드로 알 수 있는 것(구조·의존·테이블)과 없는 것(업무 규칙·의도)을 스스로 구분**하고
+  후자를 `## 열린 질문`에 명시 → human-externalization(M4)의 대상을 자동 표식.
+- **발굴 ≠ 이해 ≠ 준비**가 실행으로 증명됨. 이것이 생성-only 도구(DeepWiki류)와의 분기점.
 
 ---
 

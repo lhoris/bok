@@ -15,8 +15,11 @@ Everything else (discover/context/validate) is later milestones.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import pathlib
+import re
+import subprocess
 import sys
 
 import yaml
@@ -289,6 +292,150 @@ def cmd_ready(root: pathlib.Path, scope: str, purpose: str) -> int:
     return 0 if verdict == "READY" else 2
 
 
+# ---------------------------------------------------------------- discover
+
+def _py_packages(source: pathlib.Path) -> dict[str, list[pathlib.Path]]:
+    """Top-level package (or bare module) -> its .py files."""
+    pkgs: dict[str, list[pathlib.Path]] = {}
+    for py in sorted(source.rglob("*.py")):
+        rel = py.relative_to(source)
+        top = rel.parts[0] if len(rel.parts) > 1 else rel.stem
+        pkgs.setdefault(top, []).append(py)
+    return pkgs
+
+
+def _imports(py: pathlib.Path) -> set[str]:
+    out: set[str] = set()
+    try:
+        tree = ast.parse(py.read_text(encoding="utf-8"))
+    except (SyntaxError, UnicodeDecodeError):
+        return out
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Import):
+            for a in n.names:
+                out.add(a.name.split(".")[0])
+        elif isinstance(n, ast.ImportFrom) and n.module:
+            out.add(n.module.split(".")[0])
+    return out
+
+
+def _git_commits(root: pathlib.Path, path: pathlib.Path) -> int:
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(root), "log", "--oneline", "--", str(path)],
+            capture_output=True, text=True, timeout=15,
+        )
+        return len([x for x in r.stdout.splitlines() if x.strip()])
+    except Exception:
+        return 0
+
+
+def _sql_tables(project: pathlib.Path) -> list[tuple[str, pathlib.Path, int]]:
+    out = []
+    for sql in sorted(project.rglob("*.sql")):
+        text = sql.read_text(encoding="utf-8", errors="ignore")
+        for m in re.finditer(r"(?im)^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"`]?(\w+)", text):
+            line = text[: m.start()].count("\n") + 1
+            out.append((m.group(1), sql, line))
+    return out
+
+
+def _write_ku(path: pathlib.Path, meta: dict, body: str) -> None:
+    fm = yaml.safe_dump(meta, allow_unicode=True, sort_keys=False).strip()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"---\n{fm}\n---\n\n{body}\n", encoding="utf-8")
+
+
+def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
+    cfg, existing, _ = load_project(root)
+    existing_ids = {k.id for k in existing}
+    src = (root / source).resolve()
+    if not src.exists():
+        sys.exit(f"error: source not found: {src}")
+
+    pkgs = _py_packages(src)
+    local = set(pkgs)
+    # heatmap (design/02 §1.3): commits per package; fallback to LOC if uncommitted
+    heat, loc = {}, {}
+    for pkg, files in pkgs.items():
+        heat[pkg] = sum(_git_commits(root, f) for f in files)
+        loc[pkg] = sum(len(f.read_text(encoding="utf-8", errors="ignore").splitlines()) for f in files)
+    heat_source = "git-commits" if sum(heat.values()) > 0 else "loc (uncommitted)"
+    rank = {p: (heat[p] if heat_source.startswith("git") else loc[p]) for p in pkgs}
+    order = sorted(pkgs, key=lambda p: rank[p], reverse=True)
+
+    candidates, skipped = [], []
+
+    # package reference KUs + cross-package depends-on relations
+    for pkg in order:
+        kid = f"bok://{scope}/reference/pkg-{pkg}"
+        if kid in existing_ids:
+            skipped.append(kid); continue
+        imps = set().union(*[_imports(f) for f in pkgs[pkg]]) if pkgs[pkg] else set()
+        deps = sorted((imps & local) - {pkg})
+        rels = [{"type": "depends-on", "target": f"bok://{scope}/reference/pkg-{d}"} for d in deps]
+        files = [str(f.relative_to(root)).replace("\\", "/") for f in pkgs[pkg]]
+        meta = {
+            "id": kid, "title": f"{pkg} 패키지", "kind": "reference",
+            "layer": "component", "context": scope, "status": "draft",
+            "confidence": "inferred",
+            "provenance": [{"kind": "code", "locator": f, "note": "auto-discovered module"} for f in files],
+            "relations": rels, "owner": "unassigned",
+            "last_verified": "1970-01-01", "supersedes": None,
+        }
+        body = (
+            f"## TL;DR\n`{pkg}` 패키지 ({len(pkgs[pkg])} 모듈). 변경열도({heat_source}): {rank[pkg]}."
+            f"{' 내부 의존: ' + ', '.join(deps) if deps else ''}\n\n"
+            "## 내용\n(자동 발굴 초안 — import 그래프에서 구조를 복원했다.)\n\n"
+            "## 열린 질문 / 불확실성\n"
+            "- ⚠️ AUTO-DISCOVERED, confidence=inferred. 사람/owner 검증 전까지 신뢰 금지.\n"
+            "- 이 패키지의 **업무 규칙·의도(왜)**는 코드 구조만으로 알 수 없음 → human-externalization 필요."
+        )
+        _write_ku(root / "bok" / scope / "reference" / f"pkg-{pkg}.md", meta, body)
+        candidates.append(kid)
+
+    # data-model KUs from SQL DDL
+    for table, sqlpath, line in _sql_tables(root):
+        kid = f"bok://{scope}/reference/table-{table}"
+        if kid in existing_ids:
+            skipped.append(kid); continue
+        loc_str = f"{str(sqlpath.relative_to(root)).replace(chr(92), '/')}#L{line}"
+        meta = {
+            "id": kid, "title": f"{table} 테이블", "kind": "reference",
+            "layer": "data", "context": scope, "status": "draft",
+            "confidence": "inferred",
+            "provenance": [{"kind": "data", "locator": loc_str, "note": "CREATE TABLE DDL"}],
+            "relations": [], "owner": "unassigned",
+            "last_verified": "1970-01-01", "supersedes": None,
+        }
+        body = (
+            f"## TL;DR\n`{table}` 테이블 (DDL: {loc_str}).\n\n"
+            "## 열린 질문 / 불확실성\n- ⚠️ AUTO-DISCOVERED. 컬럼 의미·제약의 업무적 해석은 미검증."
+        )
+        _write_ku(root / "bok" / scope / "reference" / f"table-{table}.md", meta, body)
+        candidates.append(kid)
+
+    # discovery-plan.md (orchestrator memory, design/02 §1.3)
+    plan = [
+        "<!-- GENERATED by `bok discover` -->",
+        f"# Discovery Plan — {scope}", "",
+        f"- source: `{source}`  ·  heatmap: {heat_source}", "",
+        "## 우선순위 (열도순)",
+    ] + [f"{i+1}. {p}  (heat={rank[p]}, {len(pkgs[p])} files)" for i, p in enumerate(order)] + [
+        "", f"## 산출: {len(candidates)} 후보 KU (confidence=inferred, status=draft)",
+        "다음: `bok validate`로 grounding·owner 검증 → confidence 승격 (M3).",
+    ]
+    sysdir = root / "bok" / "_system"; sysdir.mkdir(parents=True, exist_ok=True)
+    (sysdir / "discovery-plan.md").write_text("\n".join(plan) + "\n", encoding="utf-8")
+
+    print(f"discovered {len(candidates)} candidate KU(s) [inferred/draft] into bok/{scope}/reference/")
+    print(f"  heatmap source: {heat_source}  ·  priority: {' > '.join(order)}")
+    if skipped:
+        print(f"  skipped {len(skipped)} existing id(s) (idempotent, no clobber)")
+    print("next: `bok compile` then `bok validate` (M3) to promote confidence.")
+    return 0
+
+
 # ---------------------------------------------------------------- init
 
 def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int:
@@ -363,6 +510,10 @@ def main(argv=None) -> int:
     pi.add_argument("--project", default="my-system")
     pi.add_argument("--context", default="core")
     pi.add_argument("--force", action="store_true")
+    pd = sub.add_parser("discover", help="mine candidate KUs from source (archaeology)")
+    pd.add_argument("path", nargs="?", default=".")
+    pd.add_argument("--scope", required=True)
+    pd.add_argument("--source", default="src")
     pc = sub.add_parser("compile", help="compile catalog/graph + schema/dangling check")
     pc.add_argument("path", nargs="?", default=".")
     ps = sub.add_parser("status", help="quick BoK dashboard")
@@ -376,6 +527,8 @@ def main(argv=None) -> int:
     root = pathlib.Path(args.path).resolve()
     if args.cmd == "init":
         return cmd_init(root, args.project, args.context, args.force)
+    if args.cmd == "discover":
+        return cmd_discover(root, args.scope, args.source)
     if args.cmd == "compile":
         return cmd_compile(root)
     if args.cmd == "status":

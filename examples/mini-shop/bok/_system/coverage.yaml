@@ -1,0 +1,19 @@
+# Coverage template — arc42 12 sections + TDD (design/04 B.2).
+# AUTHORED: {id, criticality, kus, open_gap}. `status`는 `bok ready`가 계산(hand-set 금지).
+scope: shop
+areas:
+  - {id: context-and-scope,        criticality: high,     kus: []}   # arc42 §3 / C4 Context
+  - {id: solution-strategy,        criticality: normal,   kus: []}   # arc42 §4
+  - {id: building-blocks,          criticality: high,     kus: []}   # arc42 §5 / C4 Container·Component
+  - {id: runtime-behavior,         criticality: high,     kus: []}   # arc42 §6
+  - {id: deployment-ops,           criticality: normal,   kus: []}   # arc42 §7
+  - {id: crosscutting-concepts,    criticality: normal,   kus: []}   # arc42 §8
+  - {id: decisions-rationale,      criticality: high,     kus: []}   # arc42 §9 / ADR
+  - {id: quality-requirements,     criticality: normal,   kus: []}   # arc42 §10
+  - {id: risks-tech-debt,          criticality: high,     kus: []}   # arc42 §11 / TDD
+  - {id: glossary-ubiquitous-lang, criticality: normal,   kus: []}   # arc42 §12 / DDD
+  - {id: data-model,               criticality: critical, kus: []}   # data layer
+  - {id: business-rules,           criticality: critical, kus: []}   # business process archaeology
+  - {id: dependencies-eol,         criticality: normal,   kus: []}   # TDD 의존성
+  - {id: security-compliance,      criticality: high,     kus: []}   # TDD
+  - {id: team-bus-factor,          criticality: high,     kus: []}   # TDD 팀 의존성

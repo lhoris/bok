@@ -1,0 +1,22 @@
+{
+  "nodes": [
+    "bok://shop/reference/pkg-catalog",
+    "bok://shop/reference/pkg-orders",
+    "bok://shop/reference/pkg-payments",
+    "bok://shop/reference/table-orders",
+    "bok://shop/reference/table-payments",
+    "bok://shop/reference/table-products"
+  ],
+  "edges": [
+    {
+      "from": "bok://shop/reference/pkg-orders",
+      "type": "depends-on",
+      "to": "bok://shop/reference/pkg-catalog"
+    },
+    {
+      "from": "bok://shop/reference/pkg-orders",
+      "type": "depends-on",
+      "to": "bok://shop/reference/pkg-payments"
+    }
+  ]
+}
