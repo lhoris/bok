@@ -58,6 +58,13 @@ python cli/bok.py ready   examples/acme-billing --scope billing --purpose featur
   **gaps** (dangling targets + empty coverage areas) so an AI is handed what is
   *not* known before it acts. Reproduces the design/01 B.4 example on real data.
 
+## Tests
+`python cli/test_bok.py` — 14 stdlib-unittest tests (no deps) covering schema
+rejection, dangling detection, confidence transitions (cross-support promotion,
+same-kind non-promotion, grounding demotion), sign-off gate, ready hard-gate +
+all-green, context area-mapping, assemble gaps, discover mining + idempotency,
+and pure helpers. BOK's "verify, don't trust" applied to BOK itself.
+
 ## Scope
 In: the full pipeline — init, discover, context, validate, assemble, status,
 compile, schema/dangling checks, ready, pre-commit hook.
