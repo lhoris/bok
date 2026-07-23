@@ -204,6 +204,27 @@ class BokTest(unittest.TestCase):
         code, _ = run("compile", str(self.dir))
         self.assertEqual(code, 0)
 
+    def test_discover_ignores_hidden_and_vendor_dirs(self):
+        self.src(".agents/helper.py", "x=1\n")          # stray py in a tooling dir
+        self.src("node_modules/lib/index.js", "x=1\n")  # vendor
+        self.src("app/main.py", "y=2\n")                # real code
+        run("discover", str(self.dir), "--scope", "shop", "--source", ".")
+        made = {p.name for p in (self.ctx / "reference").glob("pkg-*.md")}
+        self.assertIn("pkg-app.md", made)
+        self.assertNotIn("pkg-.agents.md", made)
+        self.assertFalse(any("node_modules" in m for m in made))
+
+    def test_discover_language_agnostic_and_branch_grouping(self):
+        # Java-style deep tree: com/co/{order,billing} -> packages order, billing (not 'com')
+        self.src("src/com/co/order/OrderSvc.java", "package com.co.order;")
+        self.src("src/com/co/order/OrderRepo.java", "package com.co.order;")
+        self.src("src/com/co/billing/Settle.java", "package com.co.billing;")
+        code, out = run("discover", str(self.dir), "--scope", "shop", "--source", "src")
+        self.assertEqual(code, 0)
+        self.assertIn("java:3", out)  # honest language census
+        made = {p.name for p in (self.ctx / "reference").glob("pkg-*.md")}
+        self.assertEqual(made, {"pkg-order.md", "pkg-billing.md"})
+
     def test_discover_is_idempotent(self):
         self.src("src/orders/svc.py")
         run("discover", str(self.dir), "--scope", "shop", "--source", "src")

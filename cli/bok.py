@@ -18,6 +18,7 @@ import argparse
 import ast
 import datetime
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -428,14 +429,70 @@ def cmd_ready(root: pathlib.Path, scope: str, purpose: str) -> int:
 
 # ---------------------------------------------------------------- discover
 
-def _py_packages(source: pathlib.Path) -> dict[str, list[pathlib.Path]]:
-    """Top-level package (or bare module) -> its .py files."""
+SKIP_DIRS = {".git", ".hg", ".svn", ".venv", "venv", "env", "node_modules",
+             "__pycache__", "target", "build", "dist", "out", "bin", "obj",
+             ".idea", ".vscode", ".vs", ".gradle", ".mvn", "vendor", "bok"}
+CODE_EXT = {".py", ".java", ".kt", ".scala", ".groovy", ".js", ".mjs", ".ts",
+            ".tsx", ".jsx", ".vue", ".go", ".rb", ".php", ".cs", ".fs", ".vb",
+            ".cpp", ".cc", ".cxx", ".c", ".h", ".hpp", ".rs", ".swift", ".m",
+            ".mm", ".sql", ".cbl", ".cob", ".cpy", ".jsp", ".jspx", ".sh", ".pl", ".r"}
+
+
+def _skip(rel: pathlib.Path) -> bool:
+    """Ignore hidden dirs (.agents, .git…) and build/vendor dirs."""
+    return any(p in SKIP_DIRS or p.startswith(".") for p in rel.parts[:-1])
+
+
+def _iter_code(source: pathlib.Path):
+    for p in sorted(source.rglob("*")):
+        if p.is_file() and p.suffix.lower() in CODE_EXT and not _skip(p.relative_to(source)):
+            yield p
+
+
+def _pkg_base(source: pathlib.Path) -> pathlib.Path:
+    """Descend single-child dir chains (e.g. com/posco/…) to the real branch point,
+    so packages come out as order/billing, not one giant 'com'."""
+    base = source
+    for _ in range(20):
+        try:
+            entries = [e for e in base.iterdir() if not (e.name in SKIP_DIRS or e.name.startswith("."))]
+        except OSError:
+            break
+        subdirs = [e for e in entries if e.is_dir()]
+        codefiles = [e for e in entries if e.is_file() and e.suffix.lower() in CODE_EXT and e.suffix.lower() != ".sql"]
+        if len(subdirs) == 1 and not codefiles:
+            base = subdirs[0]
+        else:
+            break
+    return base
+
+
+def _packages(source: pathlib.Path):
+    """Top-level dir (or bare file stem) -> code files; language-agnostic. + census."""
     pkgs: dict[str, list[pathlib.Path]] = {}
-    for py in sorted(source.rglob("*.py")):
-        rel = py.relative_to(source)
-        top = rel.parts[0] if len(rel.parts) > 1 else rel.stem
-        pkgs.setdefault(top, []).append(py)
-    return pkgs
+    census: dict[str, int] = {}
+    base = _pkg_base(source)
+    for f in _iter_code(source):
+        census[f.suffix.lower()] = census.get(f.suffix.lower(), 0) + 1
+        if f.suffix.lower() == ".sql":
+            continue  # SQL handled as data-model tables, not packages
+        anchor = base if base in f.parents else source
+        rel = f.relative_to(anchor)
+        if len(rel.parts) > 1:
+            top = rel.parts[0]                 # grouped by immediate sub-dir
+        elif anchor != source:
+            top = anchor.name                  # files sit in a descended branch dir → name it after the dir
+        else:
+            top = rel.stem                     # bare module directly under source
+        pkgs.setdefault(top, []).append(f)
+    return pkgs, census
+
+
+def _langs(files: list[pathlib.Path]) -> str:
+    c: dict[str, int] = {}
+    for f in files:
+        c[f.suffix.lower().lstrip(".")] = c.get(f.suffix.lower().lstrip("."), 0) + 1
+    return ", ".join(f"{k}:{v}" for k, v in sorted(c.items(), key=lambda x: -x[1]))
 
 
 def _imports(py: pathlib.Path) -> set[str]:
@@ -467,8 +524,10 @@ def _git_commits(root: pathlib.Path, path: pathlib.Path) -> int:
 def _sql_tables(project: pathlib.Path) -> list[tuple[str, pathlib.Path, int]]:
     out = []
     for sql in sorted(project.rglob("*.sql")):
+        if _skip(sql.relative_to(project)):
+            continue
         text = sql.read_text(encoding="utf-8", errors="ignore")
-        for m in re.finditer(r"(?im)^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"`]?(\w+)", text):
+        for m in re.finditer(r"(?im)^\s*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\"`\[]?(\w+)", text):
             line = text[: m.start()].count("\n") + 1
             out.append((m.group(1), sql, line))
     return out
@@ -487,8 +546,10 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
     if not src.exists():
         sys.exit(f"error: source not found: {src}")
 
-    pkgs = _py_packages(src)
+    pkgs, census = _packages(src)
     local = set(pkgs)
+    total = sum(census.values())
+    langs_str = ", ".join(f"{k.lstrip('.')}:{v}" for k, v in sorted(census.items(), key=lambda x: -x[1])) or "none"
     # heatmap (design/02 §1.3): commits per package; fallback to LOC if uncommitted
     heat, loc = {}, {}
     for pkg, files in pkgs.items():
@@ -500,27 +561,32 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
 
     candidates, skipped = [], []
 
-    # package reference KUs + cross-package depends-on relations
+    # package reference KUs (language-agnostic structure) + Python import relations
     for pkg in order:
         kid = f"bok://{scope}/reference/pkg-{pkg}"
         if kid in existing_ids:
             skipped.append(kid); continue
-        imps = set().union(*[_imports(f) for f in pkgs[pkg]]) if pkgs[pkg] else set()
+        files = pkgs[pkg]
+        py_files = [f for f in files if f.suffix == ".py"]
+        imps = set().union(*[_imports(f) for f in py_files]) if py_files else set()
         deps = sorted((imps & local) - {pkg})
         rels = [{"type": "depends-on", "target": f"bok://{scope}/reference/pkg-{d}"} for d in deps]
-        files = [str(f.relative_to(root)).replace("\\", "/") for f in pkgs[pkg]]
+        # provenance = the files' common directory (or the single file) — scales to large repos
+        locp = pathlib.Path(os.path.commonpath([str(f) for f in files]))
+        loc_rel = str(locp.relative_to(root)).replace("\\", "/")
         meta = {
             "id": kid, "title": f"{pkg} 패키지", "kind": "reference",
             "layer": "component", "context": scope, "status": "draft",
             "confidence": "inferred",
-            "provenance": [{"kind": "code", "locator": f, "note": "auto-discovered module"} for f in files],
+            "provenance": [{"kind": "code", "locator": loc_rel, "note": f"{len(files)} files: {_langs(files)}"}],
             "relations": rels, "owner": "unassigned",
             "last_verified": "1970-01-01", "supersedes": None,
         }
+        detail = ("import 그래프로 내부 의존 복원" if py_files else "디렉터리 구조로 복원(언어 상세 파싱 미지원)")
         body = (
-            f"## TL;DR\n`{pkg}` 패키지 ({len(pkgs[pkg])} 모듈). 변경열도({heat_source}): {rank[pkg]}."
+            f"## TL;DR\n`{pkg}` ({_langs(files)}). 변경열도({heat_source}): {rank[pkg]}."
             f"{' 내부 의존: ' + ', '.join(deps) if deps else ''}\n\n"
-            "## 내용\n(자동 발굴 초안 — import 그래프에서 구조를 복원했다.)\n\n"
+            f"## 내용\n(자동 발굴 초안 — {detail}.)\n\n"
             "## 열린 질문 / 불확실성\n"
             "- ⚠️ AUTO-DISCOVERED, confidence=inferred. 사람/owner 검증 전까지 신뢰 금지.\n"
             "- 이 패키지의 **업무 규칙·의도(왜)**는 코드 구조만으로 알 수 없음 → human-externalization 필요."
@@ -563,10 +629,19 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
     (sysdir / "discovery-plan.md").write_text("\n".join(plan) + "\n", encoding="utf-8")
 
     print(f"discovered {len(candidates)} candidate KU(s) [inferred/draft] into bok/{scope}/reference/")
-    print(f"  heatmap source: {heat_source}  ·  priority: {' > '.join(order)}")
+    print(f"  scanned {total} code files under '{source}' — languages: {langs_str}")
+    if total == 0:
+        print("  ⚠️  코드 파일 0개. --source 경로가 맞는지 확인하라 (숨김/빌드/vendor 폴더는 자동 제외).")
+    else:
+        py = census.get(".py", 0)
+        if py < total:
+            print(f"  ℹ️  Python({py})·SQL만 상세 파싱(import 그래프·테이블). 그 외 언어는 구조(디렉터리)만 발굴됨.")
+    if order:
+        head = " > ".join(order[:8]) + (" …" if len(order) > 8 else "")
+        print(f"  heatmap: {heat_source}  ·  priority: {head}")
     if skipped:
         print(f"  skipped {len(skipped)} existing id(s) (idempotent, no clobber)")
-    print("next: `bok compile` then `bok validate` (M3) to promote confidence.")
+    print("next: `bok compile` then `bok validate` to promote confidence.")
     return 0
 
 

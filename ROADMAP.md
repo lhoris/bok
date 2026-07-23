@@ -19,10 +19,11 @@ BOK는 "지속적으로 검증하고 개선한다"(헌장)를 지향한다. 아�
   자동 영역↔KU 매핑 정확도는 M2(discover) 이후 실측. 상세: `cli/README.md` M1 Findings.
 
 ## M2 — Discover (근거 발굴) 🔄
-- ✅ `bok discover` 결정론적 아키올로지(LLM 없음): import 그래프→패키지 KU+depends-on,
-  SQL DDL→데이터모델 KU, git 변경 히트맵→우선순위. provenance 자동, idempotent.
-  실증: `examples/mini-shop/`.
-- ⬜ LLM 기반 업무 규칙 추론·`kg-extraction` 심화(에이전트 레벨), Orchestrator–Worker 병렬.
+- ✅ `bok discover` 결정론적 아키올로지(LLM 없음): **언어 무관 디렉터리 구조 발굴**
+  (숨김/빌드/vendor 폴더 제외, 단일-자식 체인 하강으로 실제 모듈 단위 그룹핑, 언어 census
+  정직 보고) + **Python·SQL 상세**(import 그래프·테이블). git 변경 히트맵→우선순위.
+  provenance 자동, idempotent. 실증: `examples/mini-shop/` + POSCO-like Java 트리 테스트.
+- ⬜ 언어별 상세 파싱 확장(Java import/패키지 등), LLM 업무 규칙 추론(에이전트 레벨).
 - **검증 답**: 자동 발굴 = 전부 `inferred`/`draft`. 발굴≠준비(ready still R0). 도구가
   "코드로 모르는 것(왜)"을 스스로 표식 → M4 인적 발굴 대상 자동 식별. 상세: `cli/README.md` M2 Findings.
 

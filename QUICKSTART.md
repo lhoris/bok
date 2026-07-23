@@ -58,7 +58,7 @@ bok onboard . --scope core --source src
 
 ## 4. 한계 (지금 버전 0.1.0)
 
-- **Python + SQL만** 구조 발굴된다. 다른 언어는 discover 확장이 필요하다.
+- **모든 언어**의 디렉터리 구조는 발굴된다(Java·C#·JS 등 → 패키지 지도). 단 **Python·SQL만 상세**(import 그래프·테이블). 숨김/빌드/vendor 폴더(`.git`·`.agents`·`node_modules`·`target`…)는 자동 제외.
 - 업무규칙 **자동 추론**은 아직 CLI에 없다 — 사람 또는 Claude Code 어댑터(`adapters/claude-code/`)가 채운다.
 - `verified` 승격은 **반드시 사람 서명**(`--sign`). 자동으로 올라가지 않는다 — 그게 핵심이다.
 
