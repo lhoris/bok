@@ -78,9 +78,11 @@ examples/    실증 — acme-billing(손+검증), mini-shop(전자동 발굴)
 CONTRIBUTING.md · ROADMAP.md
 ```
 
-## 써보기
+## 써보기 → **[QUICKSTART.md](QUICKSTART.md)**
 
-실제 사용법은 **[QUICKSTART.md](QUICKSTART.md)** 참고 — `init → discover → context → compile → ready` 5단계.
+`pip install -e .` 후 두 가지 방식 중 선택:
+- **방식 A (권장) — AI CLI 안에서**: 어댑터 설치 후 Copilot/Codex/Claude에게 *"이 저장소 BOK로 온보딩해줘"* 라고 말하면 AI가 `bok`를 대신 돌린다.
+- **방식 B — 직접**: 터미널에서 `bok onboard . --scope core --source src` 한 줄.
 
 ## 시작하기 (읽는 순서)
 
