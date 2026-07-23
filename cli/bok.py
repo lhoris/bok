@@ -742,6 +742,38 @@ def cmd_assemble(root: pathlib.Path, scope: str, goal: str, need: str | None,
     return 0
 
 
+# ---------------------------------------------------------------- onboard
+
+def cmd_onboard(root: pathlib.Path, scope: str, source: str, purpose: str) -> int:
+    """One command = the whole first spiral turn (init->discover->context->
+    compile->ready). Lowers the entry barrier; honestly labels it a first pass."""
+    def banner(t):
+        print(f"\n\033[36m== {t} ==\033[0m" if sys.stdout.isatty() else f"\n== {t} ==")
+
+    if not (root / "bok.yaml").exists():
+        banner("init")
+        cmd_init(root, root.name, scope, force=False)
+    src = root / source
+    banner("discover")
+    if src.exists():
+        cmd_discover(root, scope, source)
+    else:
+        print(f"(skip: source '{source}' not found — pass --source <dir>. 코드 발굴 없이 진행)")
+    banner("context"); cmd_context(root, scope)
+    banner("compile"); cmd_compile(root)
+    banner("ready"); code = cmd_ready(root, scope, purpose)
+
+    print("\n" + "-" * 60)
+    print("이건 자동 1회전(발굴→구조화→판정)이다. 대부분 NOT READY로 나온다 — 정상.")
+    print("이해도를 올리려면:")
+    print(f"  1. 생성된 bok/{scope}/**/*.md 를 읽고 `## 열린 질문`(코드로 알 수 없는 '왜')을 채운다")
+    print(f"  2. bok validate {root} --scope {scope}        (근거 검증·승격)")
+    print(f"  3. bok validate {root} --sign <id> --owner 이름  (확인된 지식 서명→verified)")
+    print(f"  4. bok ready {root} --scope {scope} --purpose {purpose}   (다시 판정)")
+    print(f"  리포트: bok/_system/readiness-report.md")
+    return code
+
+
 # ---------------------------------------------------------------- init
 
 def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int:
@@ -811,6 +843,11 @@ def main(argv=None) -> int:
             pass
     p = argparse.ArgumentParser(prog="bok", description="Body of Knowledge CLI (M1)")
     sub = p.add_subparsers(dest="cmd", required=True)
+    po = sub.add_parser("onboard", help="ONE command: init+discover+context+compile+ready")
+    po.add_argument("path", nargs="?", default=".")
+    po.add_argument("--scope", default="core")
+    po.add_argument("--source", default="src")
+    po.add_argument("--purpose", default="understand")
     pi = sub.add_parser("init", help="scaffold bok/ + bok.yaml from templates")
     pi.add_argument("path", nargs="?", default=".")
     pi.add_argument("--project", default="my-system")
@@ -846,6 +883,8 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
 
     root = pathlib.Path(args.path).resolve()
+    if args.cmd == "onboard":
+        return cmd_onboard(root, args.scope, args.source, args.purpose)
     if args.cmd == "init":
         return cmd_init(root, args.project, args.context, args.force)
     if args.cmd == "discover":

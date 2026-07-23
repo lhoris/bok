@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bok-framework"
+version = "0.1.0"
+description = "BOK — Body of Knowledge for Brownfield Onboarding (CLI)"
+requires-python = ">=3.11"
+dependencies = ["pyyaml>=6"]
+
+[project.scripts]
+bok = "bok:main"
+
+[tool.setuptools]
+py-modules = ["bok"]
+
+[tool.setuptools.package-dir]
+"" = "cli"

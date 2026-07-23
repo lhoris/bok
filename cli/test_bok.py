@@ -155,6 +155,20 @@ class BokTest(unittest.TestCase):
         self.assertIn("READY", out)
         self.assertNotIn("NOT READY", out)
 
+    # ---- onboard: one-command pipeline ------------------------------------
+    def test_onboard_runs_full_pipeline(self):
+        # fresh project (no bok.yaml yet) with a tiny source tree
+        proj = pathlib.Path(tempfile.mkdtemp())
+        (proj / "src" / "app").mkdir(parents=True)
+        (proj / "src" / "app" / "m.py").write_text("x=1\n", encoding="utf-8")
+        code, out = run("onboard", str(proj), "--scope", "app", "--source", "src")
+        self.assertIn("init", out)
+        self.assertIn("discovered", out)
+        self.assertIn("VERDICT", out)
+        self.assertTrue((proj / "bok.yaml").exists())
+        self.assertTrue((proj / "bok/_system/readiness-report.md").exists())
+        self.assertTrue(any((proj / "bok/app/reference").glob("pkg-*.md")))
+
     # ---- context: area mapping --------------------------------------------
     def test_context_maps_ku_to_area_by_layer(self):
         self.ku("reference", "tbl", layer="data")

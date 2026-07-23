@@ -4,32 +4,25 @@
 > 코드가 알려주는 것(구조)은 자동으로 초안을 잡아주고, 코드가 **알려줄 수 없는 것**(왜·업무규칙)은
 > "여기 모른다"고 표식해준다. 그리고 **당신이 얼마나 이해했는지 점수로** 보여준다.
 
-## 0. 준비 (한 번만)
-
-BOK CLI는 파이썬 스크립트 하나다. 짧게 부르려면 `bok` 별칭을 만든다:
+## 0. 설치 (한 번만)
 
 ```sh
-# macOS/Linux — ~/.local/bin/bok 로 저장하고 실행권한
-printf '#!/bin/sh\npython /path/to/bok/cli/bok.py "$@"\n' > ~/.local/bin/bok && chmod +x ~/.local/bin/bok
-
-# Windows PowerShell — 프로필에 함수 추가
-function bok { python C:\path\to\bok\cli\bok.py @args }
+pip install -e /path/to/bok        # bok-framework 저장소 경로. Python 3.11+
 ```
-(별칭이 귀찮으면 그냥 `python /path/to/bok/cli/bok.py ...` 를 매번 써도 된다. 필요한 건 Python 3.11+ 와 `pyyaml` 뿐.)
+이러면 어디서든 `bok` 명령을 쓸 수 있다 (긴 `python .../cli/bok.py` 필요 없음).
 
-## 1. 5단계 흐름 (Python 프로젝트 기준)
+## 1. 한 줄로 시작 — `bok onboard`
 
-**이해하고 싶은 저장소 루트에서** 실행한다:
+**이해하고 싶은 저장소 루트에서** 딱 이거 하나:
 
 ```sh
-bok init     . --project my-system --context core   # ① 지식 저장소 틀 생성
-bok discover . --scope core --source src            # ② 코드에서 지식 자동 발굴
-bok context  . --scope core                         # ③ 발굴한 지식 정리·분류
-bok compile  .                                      # ④ 색인·관계 그래프 생성
-bok ready    . --scope core --purpose understand    # ⑤ "충분히 이해했나?" 판정
+bok onboard . --scope core --source src
 ```
 
-그러면 저장소에 `bok/` 폴더가 생기고, 그 안에:
+이 한 명령이 안에서 5단계(init→discover→context→compile→ready)를 다 돌린다.
+(단계를 따로 돌리고 싶으면 `bok init/discover/context/compile/ready`를 개별 실행해도 된다.)
+
+실행하면 저장소에 `bok/` 폴더가 생기고, 그 안에:
 - `bok/core/reference/*.md` — **자동 생성된 지식 단위**(사람도 AI도 읽는다)
 - `bok/_system/readiness-report.md` — **이해도 리포트**(신호등·점수·gap 목록)
 - `bok/_system/catalog.yaml`, `graph.json` — 색인·관계 그래프
@@ -69,14 +62,30 @@ bok ready    . --scope core --purpose understand    # ⑤ "충분히 이해했�
 - 업무규칙 **자동 추론**은 아직 CLI에 없다 — 사람 또는 Claude Code 어댑터(`adapters/claude-code/`)가 채운다.
 - `verified` 승격은 **반드시 사람 서명**(`--sign`). 자동으로 올라가지 않는다 — 그게 핵심이다.
 
-## 5. AI(Claude Code)와 함께 쓰기
+## 5. AI CLI 안에서 쓰기 (Codex · Claude Code · GitHub Copilot)
 
-대상 저장소에 어댑터를 깔면 슬래시 커맨드로 전 과정을 AI가 구동한다:
+핵심: AI CLI는 **터미널에서 대화하는 에이전트**다. 어댑터를 깔면 에이전트가 저장소의
+지침(`AGENTS.md` / `.github/copilot-instructions.md`)을 읽고, **네가 자연어로 시키면 `bok`를 대신 돌린다.**
+
+**① 어댑터 설치 (대상 저장소 루트에서, 한 번):**
 ```sh
-sh /path/to/bok/adapters/claude-code/install.sh   # .claude/ 에 subagent + 커맨드 설치
-# 이후 Claude Code에서:  /bok-onboard core understand
+sh /path/to/bok/adapters/github-copilot/install.sh   # GitHub Copilot
+sh /path/to/bok/adapters/codex/install.sh            # Codex
+sh /path/to/bok/adapters/claude-code/install.sh      # Claude Code
 ```
-(어댑터의 LLM 추론 흐름은 아직 파일럿 전 — 형식은 준비됨.)
+(Windows는 `install.ps1`. `bok`가 설치돼 있어야 함 — §0.)
+
+**② AI CLI를 켜고, 자연어로 시킨다:**
+```
+# 터미널에서 copilot 실행 → 그 안에서:
+이 저장소를 BOK로 온보딩해줘
+```
+그러면 Copilot이 `AGENTS.md`를 읽고 `bok onboard .`를 실행한 뒤, 코드로 알 수 없는 "왜"를
+추론해 채워준다. 슬래시 커맨드가 지원되면 `/bok-onboard core understand`도 된다.
+
+> **PowerShell에서 직접 `bok onboard`** 를 치는 것 = 결정론 엔진만 실행(사람이 운전).
+> **AI CLI 안에서 자연어로 시키는 것** = 에이전트가 `bok`를 운전 + "왜"까지 추론(권장).
+> 어댑터의 LLM 추론 흐름은 아직 파일럿 전 — 형식은 각 도구 규약에 맞춰 준비됨.
 
 ---
 **한 줄 요약:** `init → discover → context → compile → ready` 로 시작하고,
