@@ -1,8 +1,0 @@
-Metadata-Version: 2.4
-Name: bok-framework
-Version: 0.1.0
-Summary: BOK — Body of Knowledge for Brownfield Onboarding (CLI)
-Requires-Python: >=3.11
-License-File: LICENSE
-Requires-Dist: pyyaml>=6
-Dynamic: license-file
