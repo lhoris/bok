@@ -244,6 +244,23 @@ class BokTest(unittest.TestCase):
         code, out = run("discover", str(self.dir), "--scope", "shop", "--source", "src")
         self.assertIn("0 candidate", out)  # nothing new; existing ids skipped
 
+    def test_onboard_with_korean_language(self):
+        # onboard with --language ko should generate KU bodies in Korean
+        proj = pathlib.Path(tempfile.mkdtemp())
+        (proj / "src" / "app").mkdir(parents=True)
+        (proj / "src" / "app" / "m.py").write_text("x=1\n", encoding="utf-8")
+        code, out = run("onboard", str(proj), "--scope", "app", "--source", "src", "--language", "ko")
+        self.assertEqual(code, 0)
+        self.assertTrue((proj / "bok.yaml").exists())
+        yaml_txt = (proj / "bok.yaml").read_text(encoding="utf-8")
+        self.assertIn("language: ko", yaml_txt)
+        # check that KU body is in Korean
+        ku_file = next((proj / "bok/app/reference").glob("pkg-*.md"))
+        ku_txt = ku_file.read_text(encoding="utf-8")
+        self.assertIn("요약", ku_txt)  # Korean "summary"
+        self.assertIn("내용", ku_txt)  # Korean "content"
+        self.assertIn("열린 질문", ku_txt)  # Korean "open questions"
+
     # ---- unit: pure helpers -----------------------------------------------
     def test_confidence_ordering(self):
         self.assertLess(bok.conf_index("inferred"), bok.conf_index("verified"))

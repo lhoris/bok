@@ -1,5 +1,6 @@
 bok_version: "0.1.0"
 project: CHANGEME
+language: en
 bounded_contexts:
   - id: core
 

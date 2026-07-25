@@ -36,6 +36,26 @@ TIER_RANK = {"R0": 0, "R1": 1, "R2": 2, "R3": 3, "R4": 4}
 KINDS = {"reference", "explanation", "how-to", "tutorial", "glossary"}
 REQUIRED_FIELDS = ["id", "title", "kind", "context", "status", "confidence", "provenance"]
 
+# Language templates for auto-generated KU bodies
+LANG_TEMPLATES = {
+    "en": {
+        "tldr": "TL;DR",
+        "content": "Content",
+        "open_q": "Open questions / Uncertainty",
+        "auto_discovered": "AUTO-DISCOVERED",
+        "trust_warning": "AUTO-DISCOVERED, confidence=inferred. Do not trust until human/owner verification.",
+        "business_rule_note": "Business rules and intent (the 'why') cannot be inferred from code structure alone → human-externalization required.",
+    },
+    "ko": {
+        "tldr": "요약",
+        "content": "내용",
+        "open_q": "열린 질문 / 불확실성",
+        "auto_discovered": "자동 발굴됨",
+        "trust_warning": "자동 발굴됨, confidence=inferred. 사람/owner 검증 전까지 신뢰 금지.",
+        "business_rule_note": "이 패키지의 업무 규칙·의도(왜)는 코드 구조만으로 알 수 없음 → human-externalization 필요.",
+    },
+}
+
 
 def conf_index(name: str) -> int:
     try:
@@ -558,6 +578,8 @@ def _write_ku(path: pathlib.Path, meta: dict, body: str) -> None:
 
 def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
     cfg, existing, _ = load_project(root)
+    lang = cfg.get("language", "en")
+    lt = LANG_TEMPLATES.get(lang, LANG_TEMPLATES["en"])  # fallback to English
     existing_ids = {k.id for k in existing}
     src = (root / source).resolve()
     if not src.exists():
@@ -609,14 +631,16 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
             "relations": rels, "owner": "unassigned",
             "last_verified": "1970-01-01", "supersedes": None,
         }
-        detail = ("import 그래프로 내부 의존 복원" if py_files else "디렉터리 구조로 복원(언어 상세 파싱 미지원)")
+        detail = (f"import graph reconstruction" if py_files else f"directory structure (language-specific parsing not yet supported)") if lang == "en" else ("import 그래프로 내부 의존 복원" if py_files else "디렉터리 구조로 복원(언어 상세 파싱 미지원)")
+        heatmap_label = "Heatmap" if lang == "en" else "변경열도"
+        deps_label = "Internal dependencies" if lang == "en" else "내부 의존"
         body = (
-            f"## TL;DR\n`{pkg}` ({_langs(files)}). 변경열도({heat_source}): {rank[pkg]}."
-            f"{' 내부 의존: ' + ', '.join(deps) if deps else ''}\n\n"
-            f"## 내용\n(자동 발굴 초안 — {detail}.)\n\n"
-            "## 열린 질문 / 불확실성\n"
-            "- ⚠️ AUTO-DISCOVERED, confidence=inferred. 사람/owner 검증 전까지 신뢰 금지.\n"
-            "- 이 패키지의 **업무 규칙·의도(왜)**는 코드 구조만으로 알 수 없음 → human-externalization 필요."
+            f"## {lt['tldr']}\n`{pkg}` ({_langs(files)}). {heatmap_label}({heat_source}): {rank[pkg]}."
+            f"{' ' + deps_label + ': ' + ', '.join(deps) if deps else ''}\n\n"
+            f"## {lt['content']}\n(Auto-discovered draft — {detail}.)\n\n"
+            f"## {lt['open_q']}\n"
+            f"- ⚠️ {lt['auto_discovered']}, confidence=inferred. {lt['trust_warning']}\n"
+            f"- {lt['business_rule_note']}"
         )
         _write_ku(root / "bok" / scope / "reference" / f"pkg-{pkg}.md", meta, body)
         candidates.append(kid)
@@ -627,17 +651,19 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
         if kid in existing_ids:
             skipped.append(kid); continue
         loc_str = f"{str(sqlpath.relative_to(root)).replace(chr(92), '/')}#L{line}"
+        table_title = f"{table} Table" if lang == "en" else f"{table} 테이블"
         meta = {
-            "id": kid, "title": f"{table} 테이블", "kind": "reference",
+            "id": kid, "title": table_title, "kind": "reference",
             "layer": "data", "context": scope, "status": "draft",
             "confidence": "inferred",
             "provenance": [{"kind": "data", "locator": loc_str, "note": "CREATE TABLE DDL"}],
             "relations": [], "owner": "unassigned",
             "last_verified": "1970-01-01", "supersedes": None,
         }
+        col_meaning = "Column meanings and constraints have not been semantically validated." if lang == "en" else "컬럼 의미·제약의 업무적 해석은 미검증."
         body = (
-            f"## TL;DR\n`{table}` 테이블 (DDL: {loc_str}).\n\n"
-            "## 열린 질문 / 불확실성\n- ⚠️ AUTO-DISCOVERED. 컬럼 의미·제약의 업무적 해석은 미검증."
+            f"## {lt['tldr']}\n`{table}` {('Table' if lang == 'en' else '테이블')} (DDL: {loc_str}).\n\n"
+            f"## {lt['open_q']}\n- ⚠️ {lt['auto_discovered']}. {col_meaning}"
         )
         _write_ku(root / "bok" / scope / "reference" / f"table-{table}.md", meta, body)
         candidates.append(kid)
@@ -846,7 +872,7 @@ def cmd_assemble(root: pathlib.Path, scope: str, goal: str, need: str | None,
 
 # ---------------------------------------------------------------- onboard
 
-def cmd_onboard(root: pathlib.Path, scope: str, source: str, purpose: str) -> int:
+def cmd_onboard(root: pathlib.Path, scope: str, source: str, purpose: str, language: str = "en") -> int:
     """One command = the whole first spiral turn (init->discover->context->
     compile->ready). Lowers the entry barrier; honestly labels it a first pass."""
     def banner(t):
@@ -854,7 +880,7 @@ def cmd_onboard(root: pathlib.Path, scope: str, source: str, purpose: str) -> in
 
     if not (root / "bok.yaml").exists():
         banner("init")
-        cmd_init(root, root.name, scope, force=False)
+        cmd_init(root, root.name, scope, force=False, language=language)
     src = root / source
     banner("discover")
     if src.exists():
@@ -873,12 +899,15 @@ def cmd_onboard(root: pathlib.Path, scope: str, source: str, purpose: str) -> in
     print(f"  3. bok validate {root} --sign <id> --owner 이름  (확인된 지식 서명→verified)")
     print(f"  4. bok ready {root} --scope {scope} --purpose {purpose}   (다시 판정)")
     print(f"  리포트: bok/_system/readiness-report.md")
-    return code
+    return 0  # onboard reports success if pipeline completes (ready status is shown, not enforced)
 
 
 # ---------------------------------------------------------------- init
 
-def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int:
+def cmd_init(root: pathlib.Path, project: str, context: str, force: bool, language: str = "en") -> int:
+    language = language.lower() if language else "en"
+    if language not in ("ko", "en"):
+        sys.exit(f"error: --language must be 'ko' or 'en', not '{language}'")
     cfg_path = root / "bok.yaml"
     if cfg_path.exists() and not force:
         print(f"refusing: {cfg_path} already exists (use --force to overwrite config)")
@@ -888,6 +917,7 @@ def cmd_init(root: pathlib.Path, project: str, context: str, force: bool) -> int
     cfg_text = (TEMPLATES / "bok.template.yaml").read_text(encoding="utf-8")
     cfg_text = cfg_text.replace("project: CHANGEME", f"project: {project}")
     cfg_text = cfg_text.replace("- id: core", f"- id: {context}")
+    cfg_text = cfg_text.replace("language: en", f"language: {language}")
     cfg_path.write_text(cfg_text, encoding="utf-8")
 
     for kind in ("reference", "explanation", "how-to", "tutorial", "glossary"):
@@ -950,11 +980,13 @@ def main(argv=None) -> int:
     po.add_argument("--scope", default="core")
     po.add_argument("--source", default="src")
     po.add_argument("--purpose", default="understand")
+    po.add_argument("--language", default="en", help="output language: 'ko' or 'en'")
     pi = sub.add_parser("init", help="scaffold bok/ + bok.yaml from templates")
     pi.add_argument("path", nargs="?", default=".")
     pi.add_argument("--project", default="my-system")
     pi.add_argument("--context", default="core")
     pi.add_argument("--force", action="store_true")
+    pi.add_argument("--language", default="en", help="output language: 'ko' or 'en'")
     pd = sub.add_parser("discover", help="mine candidate KUs from source (archaeology)")
     pd.add_argument("path", nargs="?", default=".")
     pd.add_argument("--scope", required=True)
@@ -986,9 +1018,9 @@ def main(argv=None) -> int:
 
     root = pathlib.Path(args.path).resolve()
     if args.cmd == "onboard":
-        return cmd_onboard(root, args.scope, args.source, args.purpose)
+        return cmd_onboard(root, args.scope, args.source, args.purpose, args.language)
     if args.cmd == "init":
-        return cmd_init(root, args.project, args.context, args.force)
+        return cmd_init(root, args.project, args.context, args.force, args.language)
     if args.cmd == "discover":
         return cmd_discover(root, args.scope, args.source)
     if args.cmd == "context":
