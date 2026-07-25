@@ -1,4 +1,4 @@
-# Install the BOK Codex adapter.  Usage (from target repo root): pwsh <bok>/adapters/codex/install.ps1
+﻿# Install the BOK Codex adapter.  Usage (from target repo root): pwsh <bok>/adapters/codex/install.ps1
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $agents = Join-Path $here "..\AGENTS.md"
 
@@ -12,5 +12,11 @@ if ((Test-Path "AGENTS.md") -and -not (Select-String -Path "AGENTS.md" -Pattern 
 $dst = Join-Path $HOME ".codex\prompts"
 New-Item -ItemType Directory -Force -Path $dst | Out-Null
 Copy-Item "$here\prompts\*.md" $dst -Force
-Write-Host "[bok] installed 6 prompts into ~/.codex/prompts/ (use /bok-onboard, ...)"
-Write-Host "[bok] ensure a 'bok' shim on PATH -> python <bok-framework>/cli/bok.py args"
+Write-Host "[bok] installed 6 prompts into ~/.codex/prompts/ (type / -> /bok-onboard, ...)"
+
+# the 'bok' skill (shows up as a Codex skill)
+$skill = Join-Path $HOME ".codex\skills\bok"
+New-Item -ItemType Directory -Force -Path $skill | Out-Null
+Copy-Item "$here\skills\bok\*" $skill -Recurse -Force
+Write-Host "[bok] installed skill into ~/.codex/skills/bok/ (restart Codex to pick it up)"
+Write-Host "[bok] ensure 'bok' is installed -> pip install -e <bok-framework>"

@@ -20,5 +20,10 @@ fi
 # 2) slash-command prompts
 mkdir -p "$HOME/.codex/prompts"
 cp "$HERE"/prompts/*.md "$HOME/.codex/prompts/"
-echo "[bok] installed 6 prompts into ~/.codex/prompts/ (use /bok-onboard, /bok-discover, ...)"
-echo "[bok] ensure a 'bok' shim on PATH -> python <bok-framework>/cli/bok.py \"\$@\""
+echo "[bok] installed 6 prompts into ~/.codex/prompts/ (type / -> /bok-onboard, ...)"
+
+# 3) the 'bok' skill (shows up as a Codex skill; invoke via $bok or natural language)
+mkdir -p "$HOME/.codex/skills/bok"
+cp -r "$HERE"/skills/bok/. "$HOME/.codex/skills/bok/"
+echo "[bok] installed skill into ~/.codex/skills/bok/ (restart Codex to pick it up)"
+echo "[bok] ensure 'bok' is installed -> pip install -e <bok-framework>"

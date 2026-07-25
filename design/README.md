@@ -22,6 +22,11 @@
 - `05-repository-and-wiki-structure.md`
 - `06-example-contributor-roadmap.md`
 
+## 0.2 설계 — Knowledge Surfaces (표현 계층 재설계)
+> 오너 헌장("BOK 0.1.0 발전 방향 재설계")에 대응. 웹 리포트·LLM Wiki·용어사전을 하나의 BoK에서 파생시키는 통합 설계. 4개 역할 병렬 비판 검토 + 오너 종합.
+
+- [`0.2-knowledge-surfaces/`](0.2-knowledge-surfaces/README.md) — 00 현황·Gap → 01 목표 아키텍처 → 02 공통 Knowledge Model(`bok.json`) → 03 웹 리포트 → 04 LLM Wiki → 05 용어사전 → 06 명령어·Workflow → 07 로드맵·0.2.0 범위 → [ADR](0.2-knowledge-surfaces/adr.md)(D23–D31)
+
 ## 산출물 (설계 밖)
 - `../examples/acme-billing/` — 실증 예제(1회전 나선)
 - `../CONTRIBUTING.md` · `../ROADMAP.md`
