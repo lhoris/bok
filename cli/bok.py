@@ -435,7 +435,16 @@ SKIP_DIRS = {".git", ".hg", ".svn", ".venv", "venv", "env", "node_modules",
 CODE_EXT = {".py", ".java", ".kt", ".scala", ".groovy", ".js", ".mjs", ".ts",
             ".tsx", ".jsx", ".vue", ".go", ".rb", ".php", ".cs", ".fs", ".vb",
             ".cpp", ".cc", ".cxx", ".c", ".h", ".hpp", ".rs", ".swift", ".m",
-            ".mm", ".sql", ".cbl", ".cob", ".cpy", ".jsp", ".jspx", ".sh", ".pl", ".r"}
+            ".mm", ".sql", ".cbl", ".cob", ".cpy", ".jsp", ".jspx", ".sh", ".pl", ".r",
+            # PowerBuilder / Appeon source exports
+            ".srd", ".srw", ".sru", ".srf", ".srs", ".srm", ".sra", ".srq", ".srj", ".pbt"}
+
+# Friendly names for object-type groups (flat 4GL exports grouped by extension)
+TYPE_NAMES = {"srd": "DataWindow", "srw": "Window", "sru": "UserObject",
+              "srf": "Function", "srs": "Structure", "srm": "Menu",
+              "sra": "Application", "srq": "Query", "srj": "Project"}
+FLAT_GROUP_THRESHOLD = 15   # >this many bare files -> group by type, not per-file
+LARGE_REPO_FILES = 300      # >this -> size-based heatmap (skip per-file git; too slow)
 
 
 def _skip(rel: pathlib.Path) -> bool:
@@ -471,6 +480,7 @@ def _packages(source: pathlib.Path):
     """Top-level dir (or bare file stem) -> code files; language-agnostic. + census."""
     pkgs: dict[str, list[pathlib.Path]] = {}
     census: dict[str, int] = {}
+    bare: list[pathlib.Path] = []
     base = _pkg_base(source)
     for f in _iter_code(source):
         census[f.suffix.lower()] = census.get(f.suffix.lower(), 0) + 1
@@ -479,12 +489,19 @@ def _packages(source: pathlib.Path):
         anchor = base if base in f.parents else source
         rel = f.relative_to(anchor)
         if len(rel.parts) > 1:
-            top = rel.parts[0]                 # grouped by immediate sub-dir
+            pkgs.setdefault(rel.parts[0], []).append(f)      # grouped by immediate sub-dir
         elif anchor != source:
-            top = anchor.name                  # files sit in a descended branch dir → name it after the dir
+            pkgs.setdefault(anchor.name, []).append(f)       # files in a descended branch dir
         else:
-            top = rel.stem                     # bare module directly under source
-        pkgs.setdefault(top, []).append(f)
+            bare.append(f)                                   # bare file directly under source
+    # Flat repos (e.g. PowerBuilder export: thousands of .sr* in one dir): grouping per
+    # file would explode into 1000s of packages. Group by object type (extension) instead.
+    if len(bare) > FLAT_GROUP_THRESHOLD:
+        for f in bare:
+            pkgs.setdefault(f.suffix.lower().lstrip("."), []).append(f)
+    else:
+        for f in bare:
+            pkgs.setdefault(f.stem, []).append(f)
     return pkgs, census
 
 
@@ -550,13 +567,19 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
     local = set(pkgs)
     total = sum(census.values())
     langs_str = ", ".join(f"{k.lstrip('.')}:{v}" for k, v in sorted(census.items(), key=lambda x: -x[1])) or "none"
-    # heatmap (design/02 §1.3): commits per package; fallback to LOC if uncommitted
-    heat, loc = {}, {}
-    for pkg, files in pkgs.items():
-        heat[pkg] = sum(_git_commits(root, f) for f in files)
-        loc[pkg] = sum(len(f.read_text(encoding="utf-8", errors="ignore").splitlines()) for f in files)
-    heat_source = "git-commits" if sum(heat.values()) > 0 else "loc (uncommitted)"
-    rank = {p: (heat[p] if heat_source.startswith("git") else loc[p]) for p in pkgs}
+    # heatmap (design/02 §1.3): commits per package; fallback to LOC. Large repos ->
+    # size-based only (per-file git on 1000s of files would take minutes).
+    n_files = sum(len(v) for v in pkgs.values())
+    rank: dict[str, int] = {}
+    if n_files > LARGE_REPO_FILES:
+        heat_source = "size (large repo)"
+        for pkg, files in pkgs.items():
+            rank[pkg] = sum(f.stat().st_size for f in files)
+    else:
+        heat = {p: sum(_git_commits(root, f) for f in pkgs[p]) for p in pkgs}
+        loc = {p: sum(len(f.read_text(encoding="utf-8", errors="ignore").splitlines()) for f in pkgs[p]) for p in pkgs}
+        heat_source = "git-commits" if sum(heat.values()) > 0 else "loc (uncommitted)"
+        rank = {p: (heat[p] if heat_source.startswith("git") else loc[p]) for p in pkgs}
     order = sorted(pkgs, key=lambda p: rank[p], reverse=True)
 
     candidates, skipped = [], []
@@ -573,9 +596,13 @@ def cmd_discover(root: pathlib.Path, scope: str, source: str) -> int:
         rels = [{"type": "depends-on", "target": f"bok://{scope}/reference/pkg-{d}"} for d in deps]
         # provenance = the files' common directory (or the single file) — scales to large repos
         locp = pathlib.Path(os.path.commonpath([str(f) for f in files]))
-        loc_rel = str(locp.relative_to(root)).replace("\\", "/")
+        try:
+            loc_rel = str(locp.relative_to(root)).replace("\\", "/")
+        except ValueError:                       # source outside the project root
+            loc_rel = str(locp).replace("\\", "/")
+        title = f"{TYPE_NAMES[pkg]} 객체 그룹 (.{pkg})" if pkg in TYPE_NAMES else f"{pkg} 패키지"
         meta = {
-            "id": kid, "title": f"{pkg} 패키지", "kind": "reference",
+            "id": kid, "title": title, "kind": "reference",
             "layer": "component", "context": scope, "status": "draft",
             "confidence": "inferred",
             "provenance": [{"kind": "code", "locator": loc_rel, "note": f"{len(files)} files: {_langs(files)}"}],

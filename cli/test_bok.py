@@ -225,6 +225,19 @@ class BokTest(unittest.TestCase):
         made = {p.name for p in (self.ctx / "reference").glob("pkg-*.md")}
         self.assertEqual(made, {"pkg-order.md", "pkg-billing.md"})
 
+    def test_discover_flat_export_groups_by_type_not_explode(self):
+        # PowerBuilder-like flat export: many bare .sr* files in one dir must NOT
+        # become thousands of packages — they group by object type (extension).
+        for i in range(40):
+            self.src(f"src/w_win{i}.srw", "window")
+        for i in range(25):
+            self.src(f"src/d_dw{i}.srd", "datawindow")
+        code, out = run("discover", str(self.dir), "--scope", "shop", "--source", "src")
+        self.assertEqual(code, 0)
+        self.assertIn("srw:40", out); self.assertIn("srd:25", out)
+        made = {p.name for p in (self.ctx / "reference").glob("pkg-*.md")}
+        self.assertEqual(made, {"pkg-srw.md", "pkg-srd.md"})  # 2 type groups, not 65 files
+
     def test_discover_is_idempotent(self):
         self.src("src/orders/svc.py")
         run("discover", str(self.dir), "--scope", "shop", "--source", "src")
